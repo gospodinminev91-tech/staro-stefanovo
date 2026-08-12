@@ -1,0 +1,16 @@
+{
+  "name": "Разходка №1 · Старо Стефаново",
+  "short_name": "Разходка №1",
+  "description": "Пътеводител за препоръчана разходка №1 в архитектурен резерват Старо Стефаново.",
+  "lang": "bg",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F4EF",
+  "theme_color": "#17566B",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

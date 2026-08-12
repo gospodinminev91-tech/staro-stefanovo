@@ -7,6 +7,11 @@
 <meta name="theme-color" content="#151817" media="(prefers-color-scheme: dark)">
 <meta name="description" content="Пътеводител за препоръчана разходка №1 в архитектурен резерват Старо Стефаново — 17 спирки със снимки и карта.">
 <meta name="apple-mobile-web-app-title" content="Разходка №1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png" type="image/png">
 <title>Разходка №1 · Старо Стефаново</title>
 </head>
 <body><style>
@@ -44,6 +49,17 @@
   .seg.done{background:var(--ink-faint)}
   .seg.now{background:var(--door);height:11px}
   .seg.turn.done{background:var(--door);opacity:.45}
+
+  .iconbtn.on{background:var(--door);border-color:var(--door);color:var(--on-door)}
+
+  .strip{flex:none;background:var(--surface-2);border-bottom:1px solid var(--line);padding:7px 10px 5px;cursor:pointer;position:relative}
+  .strip svg{display:block;width:100%;height:auto;max-height:118px;margin:0 auto}
+  .strip .hint{position:absolute;right:11px;bottom:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-faint)}
+
+  .here{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;color:var(--door);font-variant-numeric:tabular-nums}
+  .here .pip{width:9px;height:9px;border-radius:50%;background:#2E7DD1;box-shadow:0 0 0 2.5px rgba(46,125,209,.25);flex:none}
+  .here.off{color:var(--ink-faint)}
+  .here.off .pip{background:var(--ink-faint);box-shadow:none}
 
   .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .card{padding:20px 16px 28px;display:flex;flex-direction:column;gap:18px}
@@ -140,6 +156,7 @@
     </div>
     <div class="rail" id="rail"></div>
   </div>
+  <div class="strip" id="strip" hidden><div id="stripmap"></div><span class="hint">бутни за голяма карта</span></div>
   <div class="scroll" id="scroll"></div>
   <div class="actions" id="actions"></div>
 </div>
@@ -251,9 +268,12 @@ var TRACK=[[43.021764,24.810728],[43.021787,24.810746],[43.0218,24.810789],[43.0
   var scroll=document.getElementById("scroll"), actions=document.getElementById("actions");
   var topbar=document.getElementById("topbar"), rail=document.getElementById("rail");
   var view=-1, dir=1, watchId=null;
+  var TKEY="ss_r1_track", SKEY="ss_r1_strip";
+  var me=null, trackOn=false, stripOn=false;
 
   try{var sv=localStorage.getItem(KEY); if(sv!==null) view=Math.min(parseInt(sv,10),TEXT.length-1);}catch(e){}
   if(isNaN(view)) view=-1;
+  try{ trackOn=localStorage.getItem(TKEY)==="1"; stripOn=localStorage.getItem(SKEY)==="1"; }catch(e){}
 
   function esc(x){return String(x).replace(/&/g,"&amp;").replace(/</g,"&lt;")}
   var ICON={
@@ -288,7 +308,11 @@ var TRACK=[[43.021764,24.810728],[43.021787,24.810746],[43.0218,24.810789],[43.0
       '</div>'+
       '<ul>'+
         [COPY.l1,COPY.l2,COPY.l3].filter(Boolean).map(function(x){return '<li>'+ICON.dot+'<span>'+esc(x)+'</span></li>'}).join('')+
-      '</ul></div>';
+      '</ul>'+
+      (trackOn
+        ? '<div class="here" id="here"><span class="pip"></span>следенето е включено</div>'
+        : '<button class="btn wide" id="trackbtn" type="button">Включи следенето по картата</button>')+
+      '</div>';
   }
 
   function stopHTML(i){
@@ -312,6 +336,7 @@ var TRACK=[[43.021764,24.810728],[43.021787,24.810746],[43.0218,24.810789],[43.0
     h+='<div class="block go"><span class="label">Накъде</span><p>'+esc(s.go)+'</p></div>';
     if(s.note) h+='<div class="note"><span class="label">Между другото</span><p>'+esc(s.note)+'</p></div>';
     if(s.warn) h+='<div class="warn">'+ICON.warn+'<span>'+esc(s.warn)+'</span></div>';
+    if(trackOn) h+='<div class="here off" id="here"><span class="pip"></span>търся сателитите…</div>';
     if(g.walk) h+='<p class="num" style="margin:0">До следващата — около '+g.walk+' мин вървене.</p>';
     h+='</div>';
     return h;
@@ -336,6 +361,8 @@ var TRACK=[[43.021764,24.810728],[43.021787,24.810746],[43.0218,24.810789],[43.0
     else if(view>=TEXT.length-1){ scroll.innerHTML=stopHTML(view)+finHTML(); actions.innerHTML=btn("prev","Назад","ghost")+btn("restart","Отначало","wide"); }
     else { scroll.innerHTML=stopHTML(view); actions.innerHTML=btn("prev","Назад","ghost")+btn("next","Стигнах","primary wide"); }
     drawRail(); scroll.scrollTop=0;
+    if(view<0){ document.getElementById("strip").hidden=true } else { paintStrip() }
+    paintMe();
     try{localStorage.setItem(KEY,String(view))}catch(e){}
   }
   function go(n,d){dir=d||(n>view?1:-1);view=Math.max(-1,Math.min(n,TEXT.length-1));render()}
@@ -353,58 +380,98 @@ var TRACK=[[43.021764,24.810728],[43.021787,24.810746],[43.0218,24.810789],[43.0
   function mx(lon){return B.pad+(lon-B.minLo)*111320*B.k*B.sc}
   function my(lat){return B.h-B.pad-(lat-B.minLa)*110540*B.sc}
 
-  function mapSVG(){
-    var pts=TRACK.map(function(p){return mx(p[1]).toFixed(1)+","+my(p[0]).toFixed(1)}).join(" ");
-    var s='<svg viewBox="0 0 '+B.w+' '+B.h+'" xmlns="http://www.w3.org/2000/svg">';
+  function mapSVG(p){
+    var pts=TRACK.map(function(q){return mx(q[1]).toFixed(1)+","+my(q[0]).toFixed(1)}).join(" ");
+    var s='<svg width="'+B.w+'" height="'+B.h+'" viewBox="0 0 '+B.w+' '+B.h+'" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">';
     s+='<polyline points="'+pts+'" style="fill:none;stroke:var(--ink-faint);stroke-width:3;stroke-linejoin:round;stroke-linecap:round;opacity:.7"/>';
     GEO.forEach(function(g,i){
       var on=(i===view);
       s+='<circle cx="'+mx(g.lon).toFixed(1)+'" cy="'+my(g.lat).toFixed(1)+'" r="'+(on?7:4.5)+'" style="fill:'+(on?"var(--door)":"var(--surface-2)")+';stroke:var(--ink-faint);stroke-width:1.4"/>';
       if(on) s+='<text x="'+mx(g.lon).toFixed(1)+'" y="'+(my(g.lat)-12).toFixed(1)+'" text-anchor="middle" style="font-family:monospace;font-size:11px;font-weight:700;fill:var(--door)">'+(i+1)+'</text>';
     });
-    s+='<g id="me" style="display:none"><circle id="meDot" cx="0" cy="0" r="6.5" style="fill:#2E7DD1;stroke:#fff;stroke-width:2.5"/></g>';
+    s+='<g id="'+p+'me" style="display:none"><circle id="'+p+'dot" cx="0" cy="0" r="6.5" style="fill:#2E7DD1;stroke:#fff;stroke-width:2.5"/></g>';
     s+='</svg>';
     return s;
+  }
+
+  function paintMe(){
+    ["s","b"].forEach(function(p){
+      var g=document.getElementById(p+"me"), d=document.getElementById(p+"dot");
+      if(!g||!d) return;
+      if(!me){ g.style.display="none"; return }
+      d.setAttribute("cx",mx(me.lon).toFixed(1));
+      d.setAttribute("cy",my(me.lat).toFixed(1));
+      g.style.display="block";
+    });
+    var h=document.getElementById("here");
+    if(h){
+      if(!me){ h.className="here off"; h.innerHTML='<span class="pip"></span>следенето е изключено'; }
+      else{
+        var g=GEO[view], dd=g?Math.round(haversine(me.lat,me.lon,g.lat,g.lon)):0;
+        h.className="here";
+        h.innerHTML='<span class="pip"></span>'+(dd<25?"ти си тук":("спирката е на "+dd+" м от теб"));
+      }
+    }
+    var msg=document.getElementById("gpsmsg");
+    if(msg&&me){
+      var best=0,bd=1e9;
+      GEO.forEach(function(st,i){ var x=haversine(me.lat,me.lon,st.lat,st.lon); if(x<bd){bd=x;best=i} });
+      msg.innerHTML="Точност около "+me.acc+" м. "+(bd<25
+        ? "Ти си на <b>спирка "+(best+1)+"</b>."
+        : "Най-близка е <b>спирка "+(best+1)+"</b> — на "+Math.round(bd)+" м.");
+    }
+  }
+
+  function paintStrip(){
+    var st=document.getElementById("strip");
+    st.hidden=!stripOn;
+    document.getElementById("mapBtn").className="iconbtn"+(stripOn?" on":"");
+    if(stripOn){ document.getElementById("stripmap").innerHTML=mapSVG("s") }
+    paintMe();
+  }
+
+  function toggleStrip(){
+    stripOn=!stripOn;
+    try{localStorage.setItem(SKEY,stripOn?"1":"0")}catch(e){}
+    paintStrip();
   }
 
   function openMap(){
     var sh=document.createElement("div");
     sh.className="sheet";
     sh.innerHTML='<header><h2>Къде съм</h2><button class="iconbtn" type="button" data-close>Затвори</button></header>'+
-      '<div class="body"><div class="mapwrap">'+mapSVG()+'</div>'+
-      '<div class="gps"><p class="gpsmsg" id="gpsmsg">Бутни „Намери ме“, за да се появи синята точка. Телефонът ще поиска разрешение за местоположение.</p>'+
-      '<button class="btn primary wide" id="findme" type="button">Намери ме</button></div></div>';
+      '<div class="body"><div class="mapwrap" id="sheetmap">'+mapSVG("b")+'</div>'+
+      '<div class="gps"><p class="gpsmsg" id="gpsmsg">'+(trackOn
+        ? 'Търся сателитите…'
+        : 'Бутни „Включи следенето“ и телефонът ще поиска разрешение за местоположение.')+'</p>'+
+      (trackOn?'':'<button class="btn primary wide" id="findme" type="button">Включи следенето</button>')+
+      '</div></div>';
     sh.addEventListener("click",function(e){
-      if(e.target.closest("[data-close]")){ stopWatch(); sh.remove(); return }
-      if(e.target.closest("#findme")) startWatch();
+      if(e.target.closest("[data-close]")){ sh.remove(); return }
+      if(e.target.closest("#findme")){ startTracking(); sh.remove(); openMap(); }
     });
     document.querySelector(".phone").appendChild(sh);
+    paintMe();
   }
 
-  function startWatch(){
-    var msg=document.getElementById("gpsmsg");
-    if(!navigator.geolocation){ msg.textContent="Този телефон не дава местоположение."; return }
-    msg.textContent="Търся сателитите…";
+  function startTracking(){
+    if(!navigator.geolocation){ alert("Този телефон не дава местоположение."); return }
+    trackOn=true;
+    try{localStorage.setItem(TKEY,"1")}catch(e){}
     if(watchId!==null) navigator.geolocation.clearWatch(watchId);
     watchId=navigator.geolocation.watchPosition(function(pos){
-      var la=pos.coords.latitude, lo=pos.coords.longitude, acc=Math.round(pos.coords.accuracy);
-      var g=document.getElementById("me"), d=document.getElementById("meDot");
-      if(!g) return;
-      d.setAttribute("cx",mx(lo).toFixed(1)); d.setAttribute("cy",my(la).toFixed(1));
-      g.style.display="block";
-      var best=0,bd=1e9;
-      GEO.forEach(function(st,i){ var dd=haversine(la,lo,st.lat,st.lon); if(dd<bd){bd=dd;best=i} });
-      var txt="Точност около "+acc+" м. ";
-      if(bd<25) txt+="Ти си на <b>спирка "+(best+1)+"</b>.";
-      else txt+="Най-близка е <b>спирка "+(best+1)+"</b> — на "+Math.round(bd)+" м.";
-      document.getElementById("gpsmsg").innerHTML=txt;
+      me={lat:pos.coords.latitude,lon:pos.coords.longitude,acc:Math.round(pos.coords.accuracy)};
+      paintMe();
     },function(err){
-      document.getElementById("gpsmsg").textContent = err.code===1
-        ? "Не даде разрешение за местоположение. Може да го включиш от настройките на браузъра."
+      me=null; paintMe();
+      var msg=document.getElementById("gpsmsg");
+      if(msg) msg.textContent = err.code===1
+        ? "Не даде разрешение за местоположение. Включва се от настройките на браузъра."
         : "Не мога да те намеря. Излез на открито и опитай пак.";
+      if(err.code===1){ trackOn=false; try{localStorage.setItem(TKEY,"0")}catch(e){} }
     },{enableHighAccuracy:true,maximumAge:3000,timeout:20000});
+    render();
   }
-  function stopWatch(){ if(watchId!==null){ navigator.geolocation.clearWatch(watchId); watchId=null } }
 
   function openList(){
     var sh=document.createElement("div");
@@ -428,12 +495,17 @@ var TRACK=[[43.021764,24.810728],[43.021787,24.810746],[43.0218,24.810789],[43.0
     if(t.id==="prev")go(view-1,-1);
     if(t.id==="restart")go(-1,-1);
   });
+
+  scroll.addEventListener("click",function(e){
+    if(e.target.closest("#trackbtn")) startTracking();
+  });
   rail.addEventListener("click",function(e){
     var t=e.target.closest("[data-jump]"); if(!t)return;
     go(parseInt(t.getAttribute("data-jump"),10));
   });
-  document.getElementById("mapBtn").addEventListener("click",openMap);
+  document.getElementById("mapBtn").addEventListener("click",toggleStrip);
   document.getElementById("listBtn").addEventListener("click",openList);
+  document.getElementById("strip").addEventListener("click",openMap);
 
   scroll.addEventListener("click",function(e){
     var im=e.target.closest("img");
@@ -456,8 +528,14 @@ var TRACK=[[43.021764,24.810728],[43.021787,24.810746],[43.0218,24.810789],[43.0
   },{passive:true});
 
   render();
+  if(trackOn) startTracking();
 })();
 </script>
 
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); });
+}
+</script>
 </body>
 </html>
