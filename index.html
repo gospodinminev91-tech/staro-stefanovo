@@ -624,13 +624,52 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
         (trackOn?'':'<button class="btn primary wide" id="findme" type="button">Включи следенето</button>')+
       '</div></div>';
     sh.addEventListener("click",function(e){
-      if(e.target.closest("[data-close]")){ sh.remove(); return }
+      if(e.target.closest("[data-close]")){ sh.remove(); wakeOff(); return }
       if(e.target.closest("#zoombtn")){ mapZoom=!mapZoom; redrawSheet(); return }
       if(e.target.closest("#findme")){ startTracking(true); sh.remove(); openMap(); }
     });
     document.querySelector(".phone").appendChild(sh);
     redrawSheet();
+    wakeOn();
   }
+
+  /* ---------- будност и наваксване ----------
+     Уеб страница не може да следи GPS при изгасен екран — браузърът я приспива.
+     Затова: (1) докато е отворена голямата карта, екранът не угасва сам;
+     (2) щом телефонът се отключи, питаме веднага къде си и прескачаме на
+     спирката, до която си стигнал — до три напред, не повече, защото
+     маршрутът се връща покрай себе си (спирки 2 и 12 са на пет метра). */
+  var wakeLock=null;
+  function wakeOn(){
+    try{ if(!navigator.wakeLock||wakeLock) return;
+      navigator.wakeLock.request("screen").then(function(l){ wakeLock=l; l.addEventListener("release",function(){ wakeLock=null }); }).catch(function(){});
+    }catch(e){}
+  }
+  function wakeOff(){ try{ if(wakeLock){ wakeLock.release(); wakeLock=null } }catch(e){} }
+
+  function catchUp(){
+    if(!me||view<0||view>=TEXT.length-1||me.acc>ACC_MAX) return;
+    for(var k=Math.min(view+3,TEXT.length-1); k>view; k--){
+      var prev=GEO[k-1], g=GEO[k];
+      var gap=haversine(prev.lat,prev.lon,g.lat,g.lon);
+      var thr=Math.min(ARRIVE,Math.max(12,gap*0.45));
+      if(distTo(g)<=thr){
+        lastAdv=Date.now(); go(k,1); buzz(); toast("Спирка "+(k+1)+" · "+TEXT[k].title);
+        return;
+      }
+    }
+  }
+
+  document.addEventListener("visibilitychange",function(){
+    if(document.visibilityState!=="visible") return;
+    if(document.getElementById("sheetmap")) wakeOn();   // браузърът пуска будността при скриване
+    if(!trackOn||!navigator.geolocation) return;
+    startTracking(true);                                // някои телефони спират следенето насън
+    navigator.geolocation.getCurrentPosition(function(pos){
+      me={lat:pos.coords.latitude,lon:pos.coords.longitude,acc:Math.max(1,Math.round(pos.coords.accuracy))};
+      paintMe(); catchUp();
+    },function(){},{enableHighAccuracy:true,maximumAge:0,timeout:15000});
+  });
 
   function startTracking(quiet){
     if(!navigator.geolocation){ denied=true; if(!quiet) render(); else paintLive(); return }
@@ -727,14 +766,14 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   <button type="button" id="updbtn" style="pointer-events:auto;border:none;border-radius:999px;padding:11px 18px;background:var(--door);color:var(--on-door);font:600 14.5px var(--sans);box-shadow:0 8px 24px -8px rgba(0,0,0,.4)">Има нова версия · Презареди</button>
 </div>
 <script>
-var APPVER="razhodka1-v5";
+var APPVER="razhodka1-v6", SHOW_UPDATE=false;
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('sw.js').catch(function(){});
     // Service worker-ът подава страницата от кеша, за да работи офлайн. Затова след
     // качване първото отваряне е старото. Тук питаме мрежата коя е текущата версия
     // и ако е различна — предлагаме презареждане. Без обхват проверката мълчи.
-    if(navigator.onLine===false) return;
+    if(!SHOW_UPDATE||navigator.onLine===false) return;
     fetch('sw.js?v='+Date.now(),{cache:'no-store'}).then(function(r){ return r.ok?r.text():''; }).then(function(t){
       var m=/CACHE\s*=\s*"([^"]+)"/.exec(t||'');
       if(!m||m[1]===APPVER) return;
