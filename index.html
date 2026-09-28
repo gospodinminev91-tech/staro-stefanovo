@@ -19,17 +19,17 @@
     --ground:#E7E7E1; --surface:#F4F4EF; --surface-2:#DEDFD8;
     --ink:#1E2320; --ink-soft:#5C635B; --ink-faint:#8B918A; --line:#C9CBC2;
     --door:#17566B; --on-door:#F4F4EF; --ochre:#A8712A; --shadow:rgba(30,35,32,.13);
-    --live:#2E7DD1; --brand:#E8901A;
+    --live:#2E7DD1; --brand:#E8901A; --act:#A9560A; --on-act:#FFFFFF;
     --map-ground:#EAEAE1; --map-road:#FFFFFF; --map-road-line:#D2D0C3; --map-bld:#DCD8CB; --map-bld-line:#C6C2B4;
     --serif:Georgia,"Iowan Old Style","Noto Serif",serif;
     --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif;
     --mono:ui-monospace,"SF Mono","Cascadia Mono",Menlo,Consolas,monospace;
   }
   @media (prefers-color-scheme:dark){
-    :root{--ground:#151817;--surface:#1E2322;--surface-2:#272D2B;--ink:#E7E8E2;--ink-soft:#A2A9A1;--ink-faint:#767D75;--line:#333A38;--door:#6BB6CE;--on-door:#14201F;--ochre:#D6A05A;--shadow:rgba(0,0,0,.45);--live:#5FA8EE;--brand:#F5A93A;--map-ground:#171B1A;--map-road:#333B39;--map-road-line:#222827;--map-bld:#232927;--map-bld-line:#2C3331}
+    :root{--ground:#151817;--surface:#1E2322;--surface-2:#272D2B;--ink:#E7E8E2;--ink-soft:#A2A9A1;--ink-faint:#767D75;--line:#333A38;--door:#6BB6CE;--on-door:#14201F;--ochre:#D6A05A;--shadow:rgba(0,0,0,.45);--live:#5FA8EE;--brand:#F5A93A;--act:#F0A040;--on-act:#1A1206;--map-ground:#171B1A;--map-road:#333B39;--map-road-line:#222827;--map-bld:#232927;--map-bld-line:#2C3331}
   }
-  :root[data-theme="dark"]{--ground:#151817;--surface:#1E2322;--surface-2:#272D2B;--ink:#E7E8E2;--ink-soft:#A2A9A1;--ink-faint:#767D75;--line:#333A38;--door:#6BB6CE;--on-door:#14201F;--ochre:#D6A05A;--shadow:rgba(0,0,0,.45);--live:#5FA8EE;--brand:#F5A93A;--map-ground:#171B1A;--map-road:#333B39;--map-road-line:#222827;--map-bld:#232927;--map-bld-line:#2C3331}
-  :root[data-theme="light"]{--ground:#E7E7E1;--surface:#F4F4EF;--surface-2:#DEDFD8;--ink:#1E2320;--ink-soft:#5C635B;--ink-faint:#8B918A;--line:#C9CBC2;--door:#17566B;--on-door:#F4F4EF;--ochre:#A8712A;--shadow:rgba(30,35,32,.13);--live:#2E7DD1;--brand:#E8901A;--map-ground:#EAEAE1;--map-road:#FFFFFF;--map-road-line:#D2D0C3;--map-bld:#DCD8CB;--map-bld-line:#C6C2B4}
+  :root[data-theme="dark"]{--ground:#151817;--surface:#1E2322;--surface-2:#272D2B;--ink:#E7E8E2;--ink-soft:#A2A9A1;--ink-faint:#767D75;--line:#333A38;--door:#6BB6CE;--on-door:#14201F;--ochre:#D6A05A;--shadow:rgba(0,0,0,.45);--live:#5FA8EE;--brand:#F5A93A;--act:#F0A040;--on-act:#1A1206;--map-ground:#171B1A;--map-road:#333B39;--map-road-line:#222827;--map-bld:#232927;--map-bld-line:#2C3331}
+  :root[data-theme="light"]{--ground:#E7E7E1;--surface:#F4F4EF;--surface-2:#DEDFD8;--ink:#1E2320;--ink-soft:#5C635B;--ink-faint:#8B918A;--line:#C9CBC2;--door:#17566B;--on-door:#F4F4EF;--ochre:#A8712A;--shadow:rgba(30,35,32,.13);--live:#2E7DD1;--brand:#E8901A;--act:#A9560A;--on-act:#FFFFFF;--map-ground:#EAEAE1;--map-road:#FFFFFF;--map-road-line:#D2D0C3;--map-bld:#DCD8CB;--map-bld-line:#C6C2B4}
 
   *{box-sizing:border-box}
   [hidden]{display:none !important}
@@ -44,23 +44,28 @@
   .phone{max-width:440px;margin:0 auto;height:100dvh;background:var(--surface);display:flex;flex-direction:column;position:relative;box-shadow:0 0 0 1px var(--line),0 18px 50px -20px var(--shadow);overflow:hidden}
   @media (min-width:520px){ body{padding:24px 16px} .phone{height:calc(100dvh - 48px);border-radius:14px} }
 
-  .topbar{flex:none;padding:13px 16px 9px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+  .topbar{flex:none;padding:9px 14px 8px;background:var(--surface);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
   .topline{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .route-name{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);white-space:nowrap}
   @media (max-width:430px){ .route-name .wide{display:none} }
   .tools{display:flex;gap:7px}
-  .iconbtn{background:none;border:1px solid var(--line);border-radius:7px;padding:6px 10px;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--ink-soft);text-transform:uppercase}
-  .iconbtn.on{background:var(--door);border-color:var(--door);color:var(--on-door)}
+  .iconbtn{border:none;border-radius:999px;padding:7px 13px;background:var(--surface-2);color:var(--ink-soft);font:600 13px var(--sans)}
+  .iconbtn.on{background:var(--act);color:var(--on-act)}
   .rail{display:flex;gap:2px;align-items:flex-end;height:13px}
   .seg{flex:1;height:4px;background:var(--surface-2);border-radius:1px;border:none;padding:0;transition:height .18s ease,background .18s ease}
   .seg.done{background:var(--ink-faint)}
-  .seg.now{background:var(--door);height:11px}
-  .seg.turn.done{background:var(--door);opacity:.45}
+  .seg.now{background:var(--act);height:9px}
+  .seg.turn.done{background:var(--act);opacity:.45}
 
   /* ---- лентата с картата ---- */
   .mapstrip{flex:none;background:var(--map-ground);border-bottom:1px solid var(--line);cursor:pointer;position:relative;line-height:0}
-  .mapstrip svg{display:block;width:100%;height:auto;max-height:200px;margin:0 auto}
-  .mapstrip .hint{position:absolute;left:9px;bottom:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-faint);line-height:1;background:var(--map-ground);padding:2px 5px;border-radius:3px;opacity:.9}
+  .mapstrip svg{display:block;width:100%;height:auto;max-height:32vh;margin:0 auto}
+  .mapstrip.mini{padding:9px 12px;display:flex;align-items:center;gap:8px;line-height:normal}
+  .mapstrip.mini #stripmap{display:none}
+  .maptools{position:absolute;top:8px;right:8px;display:flex;gap:6px;line-height:normal;z-index:2}
+  .mapstrip.mini .maptools{position:static;order:2;margin-left:auto}
+  .mapbtn{border:none;border-radius:999px;padding:6px 11px;background:var(--surface);color:var(--ink-soft);font:600 12.5px var(--sans);box-shadow:0 1px 4px var(--shadow)}
+  .mapstrip .hint{display:none;position:absolute;left:9px;bottom:6px;font-family:var(--mono);font-size:9px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-faint);line-height:1;background:var(--map-ground);padding:2px 5px;border-radius:3px;opacity:.9}
 
   /* ---- самата карта (улици и сгради от OpenStreetMap) ---- */
   .mp-bg{fill:var(--map-ground)}
@@ -82,23 +87,31 @@
   .mp-attr{font-family:var(--sans);font-size:13px;fill:var(--ink-faint);opacity:.75}
 
   /* ---- живата лента „докъде си" ---- */
-  .live{flex:none;display:flex;align-items:center;gap:11px;padding:11px 15px;border-top:1px solid var(--line);background:var(--surface);font-family:var(--sans);font-size:14.5px;color:var(--ink-soft);font-variant-numeric:tabular-nums;text-align:left;width:100%;border-left:none;border-right:none;border-bottom:none}
+  .live{position:absolute;left:8px;bottom:8px;z-index:2;max-width:calc(100% - 16px);display:flex;align-items:center;gap:8px;padding:7px 12px 7px 10px;border:none;border-radius:999px;background:var(--surface);box-shadow:0 2px 8px var(--shadow);font:500 14px var(--sans);line-height:1.25;color:var(--ink-soft);font-variant-numeric:tabular-nums;text-align:left;white-space:nowrap}
+  .live > span:nth-child(2){overflow:hidden;text-overflow:ellipsis}
+  .mapstrip.mini .live{position:static;box-shadow:none;background:var(--surface-2);order:1}
   .live .pip{width:10px;height:10px;border-radius:50%;background:var(--live);flex:none;box-shadow:0 0 0 3px color-mix(in srgb, var(--live) 25%, transparent)}
   .live.searching .pip{animation:pulse 1.5s ease-in-out infinite}
   .live.dead{color:var(--ink-faint)}
   .live.dead .pip{background:var(--ink-faint);box-shadow:none}
   .live.near{color:var(--door)}
   .live b{color:var(--ink);font-weight:600}
-  .live .far{margin-left:auto;color:var(--ink-faint);font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;white-space:nowrap}
+  .live .far{color:var(--ink-faint);font-family:var(--mono);font-size:10.5px;letter-spacing:.03em;flex:none}
+  .live.dead b{color:var(--act)}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
   @media (prefers-reduced-motion:reduce){.live.searching .pip{animation:none}}
 
   /* ---- съобщението при пристигане ---- */
-  .toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:var(--door);color:var(--on-door);padding:11px 18px;border-radius:999px;font-size:14.5px;font-weight:600;z-index:40;box-shadow:0 8px 24px -8px var(--shadow);animation:pop 2.8s ease both;pointer-events:none;white-space:nowrap}
+  .toast{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);background:var(--act);color:var(--on-act);padding:11px 18px;border-radius:999px;font-size:14.5px;font-weight:600;z-index:40;box-shadow:0 8px 24px -8px var(--shadow);animation:pop 2.8s ease both;pointer-events:none;white-space:nowrap}
   @keyframes pop{0%{opacity:0;transform:translateX(-50%) translateY(10px)}10%,80%{opacity:1;transform:translateX(-50%) translateY(0)}100%{opacity:0;transform:translateX(-50%) translateY(-6px)}}
 
   .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-  .card{padding:20px 16px 28px;display:flex;flex-direction:column;gap:18px}
+  .card{padding:14px 16px 28px;display:flex;flex-direction:column;gap:16px}
+  .titlerow{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+  .titlerow h1{flex:1}
+  .playbtn{flex:none;display:inline-flex;align-items:center;gap:7px;border:none;border-radius:999px;padding:9px 16px 9px 12px;background:var(--act);color:var(--on-act);font:600 14px var(--sans);font-variant-numeric:tabular-nums}
+  .playbtn svg{display:block}
+  .playbtn.on{background:var(--surface-2);color:var(--act);box-shadow:inset 0 0 0 2px var(--act)}
   .anim{animation:slide .26s cubic-bezier(.22,.61,.36,1) both}
   .anim.back{animation-name:slideback}
   @keyframes slide{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
@@ -109,10 +122,10 @@
   .kicker{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
   .num{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;color:var(--ink-faint);font-variant-numeric:tabular-nums}
   .badge{font-family:var(--mono);font-size:10px;letter-spacing:.13em;padding:3px 8px;border-radius:3px;border:1px solid var(--line);color:var(--ink-soft);text-transform:uppercase}
-  .badge.turn{background:var(--door);border-color:var(--door);color:var(--on-door)}
+  .badge.turn{background:var(--act);border-color:var(--act);color:var(--on-act)}
   .badge.view{border-color:var(--ochre);color:var(--ochre)}
   .badge.visit{background:var(--surface-2);border-color:var(--surface-2);color:var(--ink)}
-  h1.title{font-family:var(--serif);font-size:28px;line-height:1.18;font-weight:400;margin:0;text-wrap:balance;letter-spacing:-.01em}
+  h1.title{font-family:var(--serif);font-size:26px;line-height:1.18;font-weight:400;margin:0;text-wrap:balance;letter-spacing:-.01em}
 
   .shot{display:flex;flex-direction:column;gap:8px}
   .shot img.main{width:100%;border-radius:7px;display:block;background:var(--surface-2);cursor:zoom-in}
@@ -122,8 +135,8 @@
   .block{display:flex;flex-direction:column;gap:5px}
   .label{font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-faint)}
   .block p{margin:0}
-  .go{border-left:3px solid var(--door);padding:2px 0 2px 13px}
-  .go p{font-weight:600}
+  .go{border-left:4px solid var(--act);padding:3px 0 3px 14px}
+  .go p{font-weight:600;font-size:19px;line-height:1.42;color:var(--ink)}
   .note{background:var(--surface-2);border-radius:6px;padding:13px 14px;font-size:16px}
   .note .label{margin-bottom:4px;display:block}
   .warn{display:flex;gap:9px;align-items:flex-start;font-size:14px;color:var(--ochre);line-height:1.45}
@@ -133,7 +146,7 @@
   .btn{border-radius:8px;border:1px solid var(--line);background:transparent;padding:15px 16px;font-size:16px;font-weight:600;transition:background .15s ease}
   .btn:active{background:var(--surface-2)}
   .btn.wide{flex:1}
-  .btn.primary{background:var(--door);border-color:var(--door);color:var(--on-door)}
+  .btn.primary{background:var(--act);border-color:var(--act);color:var(--on-act)}
   .btn.primary:active{filter:brightness(.92)}
   .btn.ghost{color:var(--ink-soft);padding-left:18px;padding-right:18px}
 
@@ -150,7 +163,13 @@
   .cover h1{font-family:var(--serif);font-weight:400;font-size:36px;line-height:1.1;margin:0;letter-spacing:-.015em;text-wrap:balance}
   .cover .lede{margin:0;color:var(--ink-soft);font-size:17px;max-width:34ch}
 
-  .welcome{border-left:2px solid var(--brand);padding:2px 0 2px 15px;display:flex;flex-direction:column;gap:11px}
+  .welcome{border-left:2px solid var(--brand);padding:2px 0 2px 15px}
+  .welcome summary{cursor:pointer;list-style:none;font:600 15.5px var(--sans);color:var(--act);padding:4px 0}
+  .welcome summary::-webkit-details-marker{display:none}
+  .welcome summary::after{content:" ↓"}
+  .welcome[open] summary::after{content:" ↑"}
+  .welcome[open] summary{margin-bottom:10px}
+  .welcome p + p{margin-top:11px}
   .welcome p{margin:0;font-family:var(--serif);font-size:17.5px;line-height:1.5;color:var(--ink)}
   .welcome p:first-child{font-size:19px}
 
@@ -168,8 +187,8 @@
   .fin{padding:30px 20px 22px;display:flex;flex-direction:column;gap:20px}
   .fin h1{font-family:var(--serif);font-weight:400;font-size:30px;line-height:1.15;margin:0;text-wrap:balance}
   .fin p{margin:0;color:var(--ink-soft)}
-  .offer{border:1px solid var(--door);border-radius:8px;padding:17px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface-2)}
-  .offer .label{color:var(--door)}
+  .offer{border:1px solid var(--act);border-radius:8px;padding:17px 16px;display:flex;flex-direction:column;gap:10px;background:var(--surface-2)}
+  .offer .label{color:var(--act)}
   .offer h2{margin:0;font-family:var(--serif);font-weight:400;font-size:21px;line-height:1.25}
   .offer p{margin:0;font-size:15.5px;color:var(--ink-soft)}
   .offer .contact{font-size:15px;font-weight:600;color:var(--ochre)}
@@ -188,7 +207,7 @@
   .row b{font-weight:500;font-size:15.5px}
   .row em{font-style:normal;font-family:var(--mono);font-size:10px;letter-spacing:.11em;color:var(--door);text-transform:uppercase;margin-left:auto;white-space:nowrap}
   .row .dist{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);margin-left:auto;white-space:nowrap}
-  .row.current b{color:var(--door)}
+  .row.current b{color:var(--act)}
 
   .mapwrap{padding:14px}
   .mapwrap svg{display:block;width:100%;height:auto}
@@ -208,18 +227,17 @@
 
 <div class="phone">
   <div class="topbar" id="topbar" hidden>
-    <div class="topline">
-      <span class="route-name">Разходка №1<span class="wide"> · Старо Стефаново</span></span>
-      <span class="tools">
-        <button class="iconbtn" id="mapBtn" type="button">Карта</button>
-        <button class="iconbtn" id="listBtn" type="button">Спирки</button>
-      </span>
-    </div>
     <div class="rail" id="rail"></div>
   </div>
-  <div class="mapstrip" id="strip" hidden><div id="stripmap"></div><span class="hint">докоснете за голяма карта</span></div>
+  <div class="mapstrip" id="strip" hidden>
+    <div id="stripmap"></div>
+    <span class="maptools">
+      <button class="mapbtn" id="listBtn" type="button">Спирки</button>
+      <button class="mapbtn" id="mapBtn" type="button">Скрий</button>
+    </span>
+    <button class="live dead" id="live" type="button" hidden></button>
+  </div>
   <div class="scroll" id="scroll"></div>
-  <button class="live dead" id="live" type="button" hidden></button>
   <div class="actions" id="actions"></div>
 </div>
 
@@ -357,14 +375,14 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
       '</div>':'')+
       '<div class="coverbody">'+
         '<div class="head"><div class="eyebrow">'+esc(COPY.eyebrow)+'</div><h1>'+esc(COPY.title)+'</h1></div>'+
-        (w.length?'<div class="welcome">'+w.map(function(x){return '<p>'+esc(x)+'</p>'}).join('')+'</div>':'')+
-        '<p class="lede">'+esc(COPY.lede)+'</p>'+
         '<div class="facts">'+
-          '<div class="fact"><b>'+GEO.length+'</b><small>спирки</small></div>'+
           '<div class="fact"><b>1,7 км</b><small>дължина</small></div>'+
           '<div class="fact"><b>~1 ч</b><small>с гледане</small></div>'+
+          '<div class="fact"><b>'+GEO.length+'</b><small>спирки</small></div>'+
           '<div class="fact"><b>+127 м</b><small>нагоре</small></div>'+
         '</div>'+
+        '<p class="lede">'+esc(COPY.lede)+'</p>'+
+        (w.length?'<details class="welcome"><summary>Прочетете встъплението</summary>'+w.map(function(x){return '<p>'+esc(x)+'</p>'}).join('')+'</details>':'')+
         '<ul>'+
           [COPY.l1,COPY.l2,COPY.l3].filter(Boolean).map(function(x){return '<li>'+ICON.dot+'<span>'+esc(x)+'</span></li>'}).join('')+
         '</ul>'+
@@ -372,25 +390,66 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
       '</div></div>';
   }
 
+  /* ---------- аудио ----------
+     AUDIO[номер на спирка от 0] = файл. Празно, докато няма запис —
+     тогава бутон изобщо не се показва.                                  */
+  var AUDIO={0:"audio/razdumka.m4a"};   // ПРОБЕН запис, 28.09.2026 — ще се смени
+  var PLAY='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>';
+  var PAUSE='<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M6 4.5h4v15H6zM14 4.5h4v15h-4z"/></svg>';
+  function audioBtn(i){ return AUDIO[i]?'<button class="playbtn" type="button" id="playbtn">'+PLAY+'<span>Слушайте</span></button>':''; }
+
+  /* Записът се тегли предварително като „blob“. Така:
+     (1) пуска се мигновено от „Тръгвам“ — iPhone разрешава звук само в самото докосване;
+     (2) превъртането работи и офлайн — iPhone иска от сървъра „части“ от аудиото,
+         а кешът на service worker-а не ги дава; от blob не му трябват.             */
+  var AUD=null, BLOB={};
+  function audEl(){
+    if(AUD) return AUD;
+    AUD=new Audio(); AUD.preload="auto";
+    ["play","pause","ended","timeupdate","loadedmetadata"].forEach(function(ev){ AUD.addEventListener(ev,paintPlay) });
+    return AUD;
+  }
+  Object.keys(AUDIO).forEach(function(k){
+    try{ fetch(AUDIO[k]).then(function(r){ return r.ok?r.blob():null }).then(function(b){ if(b) BLOB[k]=URL.createObjectURL(b) }).catch(function(){}); }catch(e){}
+  });
+  function mmss(s){ s=Math.max(0,Math.round(s||0)); return Math.floor(s/60)+":"+("0"+s%60).slice(-2) }
+  function playFor(i){
+    if(!AUDIO[i]) return;
+    var a=audEl(), want=BLOB[i]||AUDIO[i];
+    if(a.getAttribute("data-i")!==String(i)){ a.src=want; a.setAttribute("data-i",String(i)); }
+    var p=a.play(); if(p&&p.catch) p.catch(function(){ paintPlay() });
+  }
+  function stopAudio(){ if(AUD&&!AUD.paused) AUD.pause() }
+  function paintPlay(){
+    var b=document.getElementById("playbtn"); if(!b) return;
+    var mine=AUD&&AUD.getAttribute("data-i")===String(view);
+    var on=mine&&!AUD.paused&&!AUD.ended;
+    var dur=(AUD&&mine&&isFinite(AUD.duration))?AUD.duration:0;
+    b.className="playbtn"+(on?" on":"");
+    b.innerHTML=(on?PAUSE:PLAY)+'<span>'+(on?mmss(AUD.currentTime)+" / "+mmss(dur)
+                 :(mine&&AUD.currentTime>1&&!AUD.ended?"Продължете · "+mmss(AUD.currentTime):"Слушайте"+(dur?" · "+mmss(dur):"")))+'</span>';
+  }
+
   function stopHTML(i){
     var s=TEXT[i], g=GEO[i];
     var h='<div class="card anim'+(dir<0?" back":"")+'">';
-    h+='<div class="head"><div class="kicker">'+
-       '<span class="num">'+(i+1)+' / '+TEXT.length+'</span>'+
-       '<span class="badge '+s.t+'">'+LABELS[s.t]+'</span>'+
-       '<span class="num">'+g.m+' м · '+g.ele+' м вис.</span>'+
-       '</div><h1 class="title">'+esc(s.title)+'</h1></div>';
+    // първо снимката — човек сверява какво вижда; после „Накъде“ — това търси в движение
     if(g.pics.length){
-      h+='<div class="shot"><img class="main" src="'+PIC[g.pics[0]]+'" alt="">';
+      h+='<div class="shot"><img class="main" src="'+PIC[g.pics[0]]+'" alt="'+esc(s.title)+'">';
       if(g.pics.length>1){
         h+='<div class="thumbs">';
-        for(var k=1;k<g.pics.length;k++){ h+='<img src="'+PIC[g.pics[k]]+'" alt="">' }
+        for(var k=1;k<g.pics.length;k++){ h+='<img src="'+PIC[g.pics[k]]+'" alt="'+esc(s.title)+'">' }
         h+='</div>';
       }
       h+='</div>';
     }
-    h+='<div class="block"><span class="label">Какво търсите</span><p>'+esc(s.look)+'</p></div>';
+    h+='<div class="head"><div class="kicker">'+
+       '<span class="num">Спирка '+(i+1)+' от '+TEXT.length+'</span>'+
+       (s.t!=="stop"?'<span class="badge '+s.t+'">'+LABELS[s.t]+'</span>':'')+
+       '<span class="num">'+g.m+' м</span>'+
+       '</div><div class="titlerow"><h1 class="title">'+esc(s.title)+'</h1>'+audioBtn(i)+'</div></div>';
     h+='<div class="block go"><span class="label">Накъде</span><p>'+esc(s.go)+'</p></div>';
+    h+='<div class="block"><span class="label">Какво търсите</span><p>'+esc(s.look)+'</p></div>';
     if(s.note) h+='<div class="note"><span class="label">Между другото</span><p>'+esc(s.note)+'</p></div>';
     if(s.warn) h+='<div class="warn">'+ICON.warn+'<span>'+esc(s.warn)+'</span></div>';
     if(g.walk) h+='<p class="walknote">До следващата — около '+g.walk+' мин вървене.</p>';
@@ -421,6 +480,8 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     else { scroll.innerHTML=stopHTML(view); actions.innerHTML=btn("prev","Назад","ghost")+btn("next","Стигнах","primary wide"); }
     drawRail(); scroll.scrollTop=0;
     if(view<0){ document.getElementById("strip").hidden=true } else { paintStrip() }
+    if(AUD&&AUD.getAttribute("data-i")!==String(view)) stopAudio();
+    paintPlay();
     if(document.getElementById("sheetmap")) redrawSheet(); else paintMe();
     try{localStorage.setItem(KEY,String(view))}catch(e){}
   }
@@ -534,19 +595,19 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     if(view<0||view>=TEXT.length){ liveBar.hidden=true; return }
     liveBar.hidden=false;
     var cls="live", txt="", far="";
-    if(denied){ cls+=" dead"; txt="следенето е изключено"; far="докоснете, за да опитате пак"; }
-    else if(!trackOn){ cls+=" dead"; txt="следенето е изключено"; far="докоснете, за да го включите"; }
-    else if(!me){ cls+=" searching"; txt="търся сателитите…"; far="изчакайте няколко секунди"; }
+    if(denied){ cls+=" dead"; txt="Няма местоположение · <b>опитайте пак</b>"; }
+    else if(!trackOn){ cls+=" dead"; txt="Следенето е изключено · <b>включете</b>"; }
+    else if(!me){ cls+=" searching"; txt="Търся сателитите…"; }
     else{
       var dHere=distTo(GEO[view]);
-      far="точност ±"+me.acc+" м";
+      far="±"+me.acc+" м";
       if(view>=TEXT.length-1){
         cls+= dHere<=ARRIVE?" near":"";
-        txt = dHere<=ARRIVE ? "<b>стигнахте края</b>" : "последната спирка е на <b>"+fmtDist(dHere)+"</b>";
+        txt = dHere<=ARRIVE ? "<b>Стигнахте края</b>" : "Последната спирка · <b>"+fmtDist(dHere)+"</b>";
       } else if(dHere<=ARRIVE){
-        cls+=" near"; txt="<b>вие сте тук</b> · спирка "+(view+1);
+        cls+=" near"; txt="<b>Вие сте тук</b>";
       } else {
-        txt="до спирка "+(view+2)+" — <b>"+fmtDist(distTo(GEO[view+1]))+"</b>";
+        txt="До спирка "+(view+2)+" · <b>"+fmtDist(distTo(GEO[view+1]))+"</b>";
       }
     }
     liveBar.className=cls;
@@ -633,15 +694,16 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     if(dNext<=thr && dNext<dHere){
       lastAdv=Date.now();
       var n=view+1;
-      go(n,1); buzz(); toast(arriveMsg(n));
+      go(n,1); buzz(); toast(arriveMsg(n)); if(AUDIO[n]) playFor(n);
     }
   }
 
   function paintStrip(){
     var st=document.getElementById("strip");
-    st.hidden=!stripOn;
-    document.getElementById("mapBtn").className="iconbtn"+(stripOn?" on":"");
-    if(stripOn){ document.getElementById("stripmap").innerHTML=mapSVG("s",false) }
+    st.hidden=false;
+    st.className="mapstrip"+(stripOn?"":" mini");
+    document.getElementById("mapBtn").textContent=stripOn?"Скрий":"Карта";
+    document.getElementById("stripmap").innerHTML=stripOn?mapSVG("s",false):"";
     paintMe();
   }
 
@@ -713,7 +775,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
       var gap=haversine(prev.lat,prev.lon,g.lat,g.lon);
       var thr=Math.min(ARRIVE,Math.max(12,gap*0.45));
       if(distTo(g)<=thr){
-        lastAdv=Date.now(); go(k,1); buzz(); toast(arriveMsg(k));
+        lastAdv=Date.now(); go(k,1); buzz(); toast(arriveMsg(k)); if(AUDIO[k]) playFor(k);
         return;
       }
     }
@@ -777,7 +839,9 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     if(t.id==="next"){
       // „Тръгвам“ е моментът, в който има право да поиска местоположение
       if(view<0&&!trackOn&&!denied){ startTracking(true) }
-      go(view+1,1); return;
+      go(view+1,1);
+      if(AUDIO[view]) playFor(view);
+      return;
     }
     if(t.id==="prev")go(view-1,-1);
     if(t.id==="restart")go(-1,-1);
@@ -793,9 +857,18 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   });
   document.getElementById("mapBtn").addEventListener("click",toggleStrip);
   document.getElementById("listBtn").addEventListener("click",openList);
-  document.getElementById("strip").addEventListener("click",openMap);
+  // бутоните и етикетът стоят върху картата — те си имат свои действия
+  document.getElementById("strip").addEventListener("click",function(e){ if(!e.target.closest("button")) openMap(); });
+  document.getElementById("mapBtn").addEventListener("click",function(e){ e.stopPropagation(); });
+  document.getElementById("listBtn").addEventListener("click",function(e){ e.stopPropagation(); });
 
   scroll.addEventListener("click",function(e){
+    if(e.target.closest("#playbtn")){
+      unlockSound();
+      var a=audEl();
+      if(a.getAttribute("data-i")===String(view)&&!a.paused) a.pause(); else playFor(view);
+      return;
+    }
     var im=e.target.closest("img");
     if(im&&!e.target.closest(".crest")&&!e.target.closest(".colophon")){
       document.getElementById("lbimg").src=im.src; document.getElementById("lb").classList.add("on");
@@ -826,7 +899,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   <button type="button" id="updbtn" style="pointer-events:auto;border:none;border-radius:999px;padding:11px 18px;background:var(--door);color:var(--on-door);font:600 14.5px var(--sans);box-shadow:0 8px 24px -8px rgba(0,0,0,.4)">Има нова версия · Презареди</button>
 </div>
 <script>
-var APPVER="razhodka1-v7", SHOW_UPDATE=false;
+var APPVER="razhodka1-v8", SHOW_UPDATE=false;
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('sw.js').catch(function(){});

@@ -1,5 +1,5 @@
-var CACHE = "razhodka1-v7";
-var FILES = ["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png"];
+var CACHE = "razhodka1-v8";
+var FILES = ["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./audio/razdumka.m4a"];
 
 self.addEventListener("install", function(e){
   self.skipWaiting();
