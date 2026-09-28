@@ -553,7 +553,66 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     liveBar.innerHTML='<span class="pip"></span><span>'+txt+'</span>'+(far?'<span class="far">'+far+'</span>':'');
   }
 
-  function buzz(){ try{ if(navigator.vibrate) navigator.vibrate([35,55,35]) }catch(e){} }
+  /* ---------- сигнали ----------
+     iPhone не позволява на уеб страници да вибрират, затова всеки сигнал
+     е и кратък тон. Звукът се отключва от първото докосване („Тръгвам“) —
+     браузърите не пускат звук без действие на човека. На iPhone тонът
+     не се чува, ако телефонът е на беззвучен режим.                     */
+  var AC=null;
+  function unlockSound(){
+    try{ if(!AC){ var C=window.AudioContext||window.webkitAudioContext; if(C) AC=new C(); }
+         if(AC&&AC.state==="suspended") AC.resume(); }catch(e){}
+  }
+  function tones(list){   // list: [[честота, продължителност_сек], ...]
+    try{ if(!AC) return; var t=AC.currentTime+0.02;
+      list.forEach(function(p){
+        var o=AC.createOscillator(), g=AC.createGain();
+        o.type="sine"; o.frequency.value=p[0];
+        g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.25,t+0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001,t+p[1]);
+        o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t+p[1]+0.02);
+        t+=p[1]+0.08;
+      });
+    }catch(e){}
+  }
+  function vib(p){ try{ if(navigator.vibrate) navigator.vibrate(p) }catch(e){} }
+  var SIG={
+    stop:  function(){ vib([35,55,35]);           tones([[880,.14]]); },
+    turn:  function(){ vib([90,70,90,70,90]);     tones([[880,.12],[1175,.18]]); },
+    lost:  function(){ vib([250,120,250,120,250]); tones([[440,.22],[440,.22],[440,.22]]); }
+  };
+  // при пристигане: завоят звучи различно, защото там се губят хората
+  function buzz(){ var s=TEXT[view]; (s&&s.t==="turn"?SIG.turn:SIG.stop)(); }
+  function arriveMsg(n){ return (TEXT[n].t==="turn"?"Завой · ":"Спирка "+(n+1)+" · ")+TEXT[n].title; }
+
+  /* ---------- отклонение от маршрута ----------
+     Ако си на повече от 40 м от следата поне 30 секунди — сигнал и надпис.
+     Не звъни: при лоша точност (над 30 м), на корицата и на финала, и близо
+     до текущата или следващата спирка — спирка 11 (плочата) е нарочно на
+     60 м встрани от пътя. Звъни веднъж; следващият път — едва след като
+     си се върнал на пътя.                                                  */
+  var OFF_M=40, OFF_MS=30000, offSince=0, offWarned=false;
+  function distToTrack(la,lo){
+    var k=Math.cos(la*Math.PI/180), best=1e9;
+    for(var i=1;i<TRACK.length;i++){
+      var ax=(TRACK[i-1][1]-lo)*111320*k, ay=(TRACK[i-1][0]-la)*110540;
+      var bx=(TRACK[i][1]-lo)*111320*k,   by=(TRACK[i][0]-la)*110540;
+      var dx=bx-ax, dy=by-ay, L=dx*dx+dy*dy, t=L?Math.max(0,Math.min(1,-(ax*dx+ay*dy)/L)):0;
+      var px=ax+t*dx, py=ay+t*dy, d=Math.sqrt(px*px+py*py);
+      if(d<best) best=d;
+    }
+    return best;
+  }
+  function checkRoute(){
+    if(!me||!trackOn||view<0||view>=TEXT.length-1||me.acc>30){ offSince=0; return }
+    var nearStop = distTo(GEO[view])<60 || distTo(GEO[view+1])<60;
+    var off = !nearStop && distToTrack(me.lat,me.lon)>OFF_M;
+    if(!off){ offSince=0; if(distToTrack(me.lat,me.lon)<25) offWarned=false; return }
+    if(!offSince) offSince=Date.now();
+    if(!offWarned && Date.now()-offSince>=OFF_MS){
+      offWarned=true; SIG.lost(); toast("Отклонихте се от маршрута · вижте картата");
+    }
+  }
   function toast(t){
     var el=document.createElement("div"); el.className="toast"; el.textContent=t;
     document.querySelector(".phone").appendChild(el);
@@ -574,7 +633,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     if(dNext<=thr && dNext<dHere){
       lastAdv=Date.now();
       var n=view+1;
-      go(n,1); buzz(); toast("Спирка "+(n+1)+" · "+TEXT[n].title);
+      go(n,1); buzz(); toast(arriveMsg(n));
     }
   }
 
@@ -654,7 +713,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
       var gap=haversine(prev.lat,prev.lon,g.lat,g.lon);
       var thr=Math.min(ARRIVE,Math.max(12,gap*0.45));
       if(distTo(g)<=thr){
-        lastAdv=Date.now(); go(k,1); buzz(); toast("Спирка "+(k+1)+" · "+TEXT[k].title);
+        lastAdv=Date.now(); go(k,1); buzz(); toast(arriveMsg(k));
         return;
       }
     }
@@ -678,7 +737,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     if(watchId!==null) navigator.geolocation.clearWatch(watchId);
     watchId=navigator.geolocation.watchPosition(function(pos){
       me={lat:pos.coords.latitude,lon:pos.coords.longitude,acc:Math.max(1,Math.round(pos.coords.accuracy))};
-      paintMe(); maybeAdvance();
+      paintMe(); maybeAdvance(); checkRoute();
       // приближената карта върви след теб
       if(mapZoom && document.getElementById("sheetmap")) redrawSheet();
     },function(err){
@@ -714,6 +773,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
 
   actions.addEventListener("click",function(e){
     var t=e.target.closest("button"); if(!t)return;
+    unlockSound();
     if(t.id==="next"){
       // „Тръгвам“ е моментът, в който има право да поиска местоположение
       if(view<0&&!trackOn&&!denied){ startTracking(true) }
@@ -766,7 +826,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   <button type="button" id="updbtn" style="pointer-events:auto;border:none;border-radius:999px;padding:11px 18px;background:var(--door);color:var(--on-door);font:600 14.5px var(--sans);box-shadow:0 8px 24px -8px rgba(0,0,0,.4)">Има нова версия · Презареди</button>
 </div>
 <script>
-var APPVER="razhodka1-v6", SHOW_UPDATE=false;
+var APPVER="razhodka1-v7", SHOW_UPDATE=false;
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('sw.js').catch(function(){});

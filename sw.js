@@ -1,4 +1,4 @@
-var CACHE = "razhodka1-v6";
+var CACHE = "razhodka1-v7";
 var FILES = ["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png"];
 
 self.addEventListener("install", function(e){
