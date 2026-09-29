@@ -1,4 +1,4 @@
-var CACHE = "razhodka1-v12";
+var CACHE = "razhodka1-v14";
 var FILES = ["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./img/carkva.jpg","./img/cheshma.jpg","./img/hram.jpg","./img/johan.jpg","./img/levski.jpg","./img/patq.jpg","./img/plocha.jpg","./img/rajna.jpg","./img/shiroko.jpg","./img/sini.jpg","./img/sredishte.jpg","./img/ulichka.jpg","./img/vazov.jpg","./audio/kos.m4a","./audio/ku-ku.m4a","./audio/razdumka.m4a","./map/dem/14/9320/6018.png","./map/dem/14/9320/6019.png","./map/dem/14/9321/6018.png","./map/dem/14/9321/6019.png","./map/maplibre-gl.css","./map/maplibre-gl.js","./map/selo.json"];
 
 self.addEventListener("install", function(e){
