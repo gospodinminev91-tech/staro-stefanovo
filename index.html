@@ -139,6 +139,13 @@
   .block p{margin:0}
   .go{border-left:4px solid var(--act);padding:3px 0 3px 14px}
   .go p{font-weight:600;font-size:19px;line-height:1.42;color:var(--ink)}
+  /* „Следва" — в дъното на всяка спирка: коя е следващата и как се познава. Не се натиска нищо, за да се види. */
+  .nextcard{margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:13px 14px 15px;display:flex;flex-direction:column;gap:12px;background:var(--surface)}
+  .nextcard > .label{color:var(--act)}
+  .nc-row{display:flex;gap:12px;align-items:center}
+  .nc-row img{width:64px;height:64px;object-fit:cover;border-radius:6px;flex:none;background:var(--surface-2);cursor:zoom-in}
+  .nc-row b{display:block;font-family:var(--serif);font-weight:400;font-size:19px;line-height:1.25}
+  .nc-row small{display:block;margin-top:3px;font-size:13.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
   .note{background:var(--surface-2);border-radius:6px;padding:13px 14px;font-size:16px}
   .note .label{margin-bottom:4px;display:block}
   .warn{display:flex;gap:9px;align-items:flex-start;font-size:14px;color:var(--ochre);line-height:1.45}
@@ -217,6 +224,16 @@
 
   .mapwrap{padding:14px}
   .mapwrap svg{display:block;width:100%;height:auto}
+  /* ---- истинската карта (MapLibre) — ако не тръгне, остава SVG-то отгоре ---- */
+  .mlmap{width:100%;aspect-ratio:1000/515;max-height:32vh;background:var(--map-ground)}
+  .mapwrap .mlmap{aspect-ratio:auto;height:min(62vh,560px);max-height:none;border-radius:8px;overflow:hidden}
+  .mlmap canvas{outline:none}
+  .ml-attr{position:absolute;right:4px;bottom:3px;z-index:1;pointer-events:none;font:10.5px/1.25 var(--sans);color:var(--ink-faint);background:color-mix(in srgb, var(--map-ground) 75%, transparent);padding:1px 4px;border-radius:3px}
+  .mapstrip .ml-attr{bottom:auto;top:3px;right:auto;left:4px}
+  .ml-me{width:0;height:0;position:relative;pointer-events:none}
+  .ml-me .cone{position:absolute;left:-40px;top:-40px;width:80px;height:80px;display:none}
+  .ml-me .dot{position:absolute;left:-9px;top:-9px;width:18px;height:18px;border-radius:50%;background:var(--live);border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+  .ml-num{font:700 17px var(--sans);color:var(--door);pointer-events:none;text-shadow:0 0 3px var(--map-ground),0 0 3px var(--map-ground),0 0 5px var(--map-ground)}
   .gps{padding:0 16px 16px;display:flex;flex-direction:column;gap:10px}
   .gpsmsg{font-size:15px;color:var(--ink-soft);min-height:1.5em;margin:0}
   .gpsmsg b{color:var(--ink)}
@@ -350,7 +367,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   var liveBar=document.getElementById("live");
   var view=-1, dir=1, watchId=null, lastAdv=0;
   // arrived=false: „на път към спирка view“; true: „при спирка view“.
-  // „Стигнах“ само отбелязва пристигането — не прескача към следващата.
+  // Стига се от GPS-а (или от „Стигнах края“ на последната); бутонът води към следващата.
   var arrived=true, AKEY="ss_r1_arrived";
   try{ arrived=localStorage.getItem(AKEY)!=="0" }catch(e){}
   // праг за стигане до спирка k: 15 м, но по-малко, ако предишната е наблизо (мин. 10)
@@ -469,9 +486,11 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   }
 
   function stopHTML(i){
-    var s=TEXT[i], g=GEO[i];
+    var s=TEXT[i], g=GEO[i], p=i>0?TEXT[i-1]:null, pg=i>0?GEO[i-1]:null;
+    // „На път към“: човекът е тръгнал от предишната, но още не е стигнал (GPS-ът ще каже).
+    // Показва се всичко за спирката — снимката, за да я познае, — а отгоре как се стига.
+    var going=!arrived&&!!p;
     var h='<div class="card anim'+(dir<0?" back":"")+'">';
-    // първо снимката — човек сверява какво вижда; после „Накъде“ — това търси в движение
     if(g.pics.length){
       h+='<div class="shot"><img class="main" src="'+PIC[g.pics[0]]+'" alt="'+esc(s.title)+'">';
       if(g.pics.length>1){
@@ -481,33 +500,36 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
       }
       h+='</div>';
     }
-    if(!arrived){
-      // НА ПЪТ КЪМ спирка i: снимката, за да я познаете, и как се стига до нея —
-      // „Накъде“ от предишната спирка. Още не казваме „тук сте“.
-      var p=i>0?TEXT[i-1]:null, pg=i>0?GEO[i-1]:null;
-      h+='<div class="head"><div class="kicker">'+
-         '<span class="num going">Следваща спирка · '+(i+1)+' от '+TEXT.length+'</span>'+
-         (s.t!=="stop"?'<span class="badge '+s.t+'">'+LABELS[s.t]+'</span>':'')+
-         '</div><h1 class="title">'+esc(s.title)+'</h1></div>';
-      if(p) h+='<div class="block go"><span class="label">Как да стигнете</span><p>'+esc(p.go)+'</p></div>';
-      h+='<div class="block"><span class="label">Какво търсите</span><p>'+esc(s.look)+'</p></div>';
-      if(p&&p.warn) h+='<div class="warn">'+ICON.warn+'<span>'+esc(p.warn)+'</span></div>';
-      if(pg&&pg.walk) h+='<p class="walknote">Около '+pg.walk+' мин вървене.</p>';
-      h+='</div>';
-      return h;
-    }
     h+='<div class="head"><div class="kicker">'+
-       '<span class="num">Спирка '+(i+1)+' от '+TEXT.length+'</span>'+
+       (going ? '<span class="num going">На път към спирка '+(i+1)+' от '+TEXT.length+'</span>'
+              : '<span class="num">Спирка '+(i+1)+' от '+TEXT.length+'</span>')+
        (s.t!=="stop"?'<span class="badge '+s.t+'">'+LABELS[s.t]+'</span>':'')+
-       '<span class="num">'+g.m+' м</span>'+
+       (going?'':'<span class="num">'+g.m+' м</span>')+
        '</div><div class="titlerow"><h1 class="title">'+esc(s.title)+'</h1>'+audioBtn(i)+'</div></div>';
-    h+='<div class="block go"><span class="label">Накъде</span><p>'+esc(s.go)+'</p></div>';
-    h+='<div class="block"><span class="label">Какво търсите</span><p>'+esc(s.look)+'</p></div>';
+    // Всеки текст стои САМО на своята спирка. „Накъде“ в текстовете на сдружението казва
+    // какво се прави тук и после („слезте и пийте… върнете се на пътя“) — не е пътят до
+    // следващата. Затова на път към спирката най-отгоре е нейното „Какво търсите“:
+    // то казва как да я познаете.
+    var look='<div class="block'+(going?" go":"")+'"><span class="label">Какво търсите</span><p>'+esc(s.look)+'</p></div>';
+    var goB='<div class="block'+(going?"":" go")+'"><span class="label">Накъде</span><p>'+esc(s.go)+'</p></div>';
+    h+= going ? look+goB : goB+look;
     if(s.note) h+='<div class="note"><span class="label">Между другото</span><p>'+esc(s.note)+'</p></div>';
     if(s.warn) h+='<div class="warn">'+ICON.warn+'<span>'+esc(s.warn)+'</span></div>';
-    if(g.walk) h+='<p class="walknote">До следващата — около '+g.walk+' мин вървене.</p>';
+    if(going&&pg&&pg.walk) h+='<p class="walknote">От предишната — около '+pg.walk+' мин вървене.</p>';
+    if(!going&&i<TEXT.length-1) h+=nextCardHTML(i);
     h+='</div>';
     return h;
+  }
+
+  // „Следва“: следващата спирка в малко прозорче — снимка, име, колко е, как се познава.
+  function nextCardHTML(i){
+    var s=TEXT[i], g=GEO[i], n=TEXT[i+1], ng=GEO[i+1];
+    var far=(me&&trackOn)?fmtDist(distTo(ng)):((ng.m-g.m)+' м');
+    var h='<div class="nextcard"><span class="label">Следва</span><div class="nc-row">';
+    if(ng.pics.length) h+='<img src="'+PIC[ng.pics[0]]+'" alt="'+esc(n.title)+'">';
+    h+='<div><b>'+(i+2)+' · '+esc(n.title)+'</b><small id="ncfar">'+far+(g.walk?' · около '+g.walk+' мин':'')+'</small></div></div>';
+    h+='<div class="block"><span class="label">Какво търсите там</span><p>'+esc(n.look)+'</p></div>';
+    return h+'</div>';
   }
 
   function finHTML(){
@@ -530,9 +552,9 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
 
   function render(){
     if(view<0){ scroll.innerHTML=coverHTML(); actions.innerHTML=btn("next","Тръгвам","primary wide"); }
-    else if(!arrived){ scroll.innerHTML=stopHTML(view); actions.innerHTML=btn("prev","Назад","ghost")+btn("next","Стигнах","primary wide"); }
-    else if(view>=TEXT.length-1){ scroll.innerHTML=stopHTML(view)+finHTML(); actions.innerHTML=btn("prev","Назад","ghost")+btn("restart","Отначало","wide"); }
-    else { scroll.innerHTML=stopHTML(view); actions.innerHTML=btn("prev","Назад","ghost")+btn("next","Към следващата","primary wide"); }
+    else if(view>=TEXT.length-1&&arrived){ scroll.innerHTML=stopHTML(view)+finHTML(); actions.innerHTML=btn("prev","Назад","ghost")+btn("restart","Отначало","wide"); }
+    else if(view>=TEXT.length-1){ scroll.innerHTML=stopHTML(view); actions.innerHTML=btn("prev","Назад","ghost")+btn("next","Стигнах края","primary wide"); }
+    else { scroll.innerHTML=stopHTML(view); actions.innerHTML=btn("prev","Назад","ghost")+btn("next","Към спирка "+(view+2),"primary wide"); }
     drawRail(); scroll.scrollTop=0;
     if(view<0){ document.getElementById("strip").hidden=true } else { paintStrip() }
     if(AUD&&AUD.getAttribute("data-i")!==String(view)) stopAudio();
@@ -542,7 +564,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   }
   // скок към спирка (списък, лента горе): смята се, че сте при нея
   function go(n,d){dir=d||(n>view?1:-1);view=Math.max(-1,Math.min(n,TEXT.length-1));arrived=true;render()}
-  // „Стигнах“ / „Към следващата“ / „Тръгвам“
+  // „Към спирка N“ / „Стигнах края“ / „Тръгвам“
   function nextAction(){
     if(view<0){
       if(!trackOn&&!denied) startTracking(true);
@@ -550,15 +572,16 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
       dir=1; view=0; arrived=true; render(); if(AUDIO[0]) playFor(0);
       return;
     }
-    if(!arrived){ arriveAt(view,false); return; }             // само отбелязва
-    if(view<TEXT.length-1){ dir=1; view++; arrived=false; render(); }
+    // Едно натискане: тръгвате към следващата. Стигането го казва GPS-ът сам;
+    // без GPS страницата пак има всичко — само горе пише „На път към“.
+    if(view<TEXT.length-1){ dir=1; view++; arrived=false; render(); return; }
+    if(!arrived) arriveAt(view,false);                        // последната спирка → финалът
   }
   // „Назад“ — стъпка назад по същите състояния
   function prevAction(){
     if(view<0) return;
     dir=-1;
-    if(arrived&&view>0){ arrived=false; }
-    else if(!arrived){ view--; arrived=true; }
+    if(view>0){ view--; arrived=true; }
     else { view=-1; arrived=true; }
     render();
   }
@@ -659,6 +682,8 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
         } else ld.style.display="none";
       }
     });
+    mlMe(ML.strip); mlMe(ML.sheet);
+    if(me&&ML.mode==="me") mlCamera(ML.sheet,true);
     paintLive();
     // Съзнателно НЕ показваме „най-близката спирка“ — маршрутът се връща покрай себе си
     // (спирка 2 и спирка 12 са на пет метра) и такова число само обърква.
@@ -678,7 +703,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   /* Компас. iPhone дава посоката готова (webkitCompassHeading) и иска разрешение —
      затова се пита при „Тръгвам“. Android дава ъгъл спрямо север (absolute).
      Компасът на телефона греши с 10–20°, особено до метал или кола.            */
-  var heading=null, compassOn=false, coneRaf=0;
+  var heading=null, compassOn=false, coneRaf=0, compassAt=0, compassAsking=false;
   function startCompass(){
     if(compassOn) return;
     var on=function(e){
@@ -687,15 +712,19 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
       else if(e.absolute&&typeof e.alpha==="number") h=360-e.alpha;
       if(h===null) return;
       var ang=(screen.orientation&&screen.orientation.angle)||window.orientation||0;
-      heading=(h+ang+360)%360;
+      heading=(h+ang+360)%360; compassAt=Date.now();
       var now=Date.now(); if(now-coneRaf<60) return; coneRaf=now;   // до ~16 пъти в секунда — стига за плавно, пести батерия
       ["s","b"].forEach(function(p){ if(me) paintCone(p,mx(me.lon),my(me.lat)) });
+      mlCone(ML.strip); mlCone(ML.sheet);
     };
     try{
       if(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==="function"){
+        if(compassAsking) return;                 // прозорчето „Разреши“ вече е отворено
+        compassAsking=true;
         DeviceOrientationEvent.requestPermission().then(function(r){
+          compassAsking=false;
           if(r==="granted"){ compassOn=true; window.addEventListener("deviceorientationabsolute",on); window.addEventListener("deviceorientation",on); }
-        }).catch(function(){});
+        }).catch(function(){ compassAsking=false });
       } else if(window.DeviceOrientationEvent){
         compassOn=true;
         window.addEventListener("deviceorientationabsolute",on);
@@ -703,12 +732,216 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
       }
     }catch(e){}
   }
+  document.addEventListener("click",function(){ if(view>=0) startCompass() },true);
   function paintCone(p,x,y){
     var c=document.getElementById(p+"cone"); if(!c) return;
     if(heading===null){ c.style.display="none"; return }
     c.setAttribute("transform","translate("+x.toFixed(1)+","+y.toFixed(1)+") rotate("+heading.toFixed(0)+")");
     c.style.display="block";
   }
+
+  /* ---------- истинската карта (етап 2) ----------
+     MapLibre рисува от файлове в map\, които пристигат с приложението и се пазят
+     за офлайн: selo.json (улици, пътеки, гори, ливади, хоризонтали, нашите следи)
+     и dem\ (височините — от тях идва сянката на хълмовете). Никакви плочки отвън.
+     Ако MapLibre не тръгне (стар телефон без WebGL, файлът не е дошъл) — остава
+     старата SVG карта отгоре, нищо не се чупи. Правят се с ЗАПИСИ\pravi-kartata.js. */
+  var BASE=location.href.replace(/[#?].*$/,"").replace(/[^\/]*$/,"");
+  var ML={ok:false, data:null, strip:null, sheet:null, mode:"me"};   // mode: me = води след теб, all = цялата, free = човекът я мести
+
+  function mlLoad(){
+    try{
+      var cv=document.createElement("canvas");
+      if(!(cv.getContext("webgl2")||cv.getContext("webgl"))) return;
+    }catch(e){ return }
+    var css=document.createElement("link"); css.rel="stylesheet"; css.href="map/maplibre-gl.css"; document.head.appendChild(css);
+    var js=new Promise(function(ok,no){
+      var s=document.createElement("script"); s.src="map/maplibre-gl.js"; s.onload=ok; s.onerror=no; document.head.appendChild(s);
+    });
+    var dt=fetch("map/selo.json").then(function(r){ if(!r.ok) throw r.status; return r.json() });
+    Promise.all([js,dt]).then(function(v){
+      if(!window.maplibregl) return;
+      ML.data=v[1]; ML.ok=true;
+      if(view>=0) paintStrip();
+      if(document.getElementById("sheetmap")) redrawSheet();
+    }).catch(function(){});
+  }
+
+  function mlDark(){
+    var c=getComputedStyle(document.documentElement).getPropertyValue("--map-ground").trim();
+    var m=/^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i.exec(c);
+    return m ? (parseInt(m[1],16)+parseInt(m[2],16)+parseInt(m[3],16))<384 : false;
+  }
+  function mlStyle(){
+    var cs=getComputedStyle(document.documentElement), v=function(n){ return cs.getPropertyValue(n).trim() };
+    var dk=mlDark();
+    var P=dk
+      ? {res:"#1B1F1E",meadow:"#1C2320",scrub:"#1E2721",forest:"#1B2A21",water:"#1E3542",contour:"#8A7B5E",shade:"#000000",light:"#3B403D",walked:"#8C8472"}
+      : {res:"#E4E2D8",meadow:"#E2E8CE",scrub:"#D3DEC2",forest:"#C2D4B3",water:"#BCD6E6",contour:"#A68A5E",shade:"#4F4636",light:"#FFFFFF",walked:"#9A8F78"};
+    var K=function(k){ return ["==",["get","k"],k] };
+    return {
+      version:8,
+      sources:{
+        selo:{type:"geojson",data:ML.data},
+        dem:{type:"raster-dem",tiles:[BASE+"map/dem/{z}/{x}/{y}.png"],encoding:"terrarium",tileSize:256,
+             minzoom:14,maxzoom:14,bounds:[24.7852,43.0045,24.8291,43.0327]},
+        route:{type:"geojson",data:{type:"FeatureCollection",features:[]}},
+        stops:{type:"geojson",data:{type:"FeatureCollection",features:[]}},
+        me:{type:"geojson",data:{type:"FeatureCollection",features:[]}}
+      },
+      layers:[
+        {id:"bg",type:"background",paint:{"background-color":v("--map-ground")}},
+        {id:"res",type:"fill",source:"selo",filter:K("res"),paint:{"fill-color":P.res}},
+        {id:"meadow",type:"fill",source:"selo",filter:K("meadow"),paint:{"fill-color":P.meadow}},
+        {id:"scrub",type:"fill",source:"selo",filter:K("scrub"),paint:{"fill-color":P.scrub}},
+        {id:"forest",type:"fill",source:"selo",filter:K("forest"),paint:{"fill-color":P.forest}},
+        {id:"water",type:"fill",source:"selo",filter:K("water"),paint:{"fill-color":P.water}},
+        {id:"shade",type:"hillshade",source:"dem",paint:{"hillshade-shadow-color":P.shade,"hillshade-highlight-color":P.light,
+          "hillshade-accent-color":P.shade,"hillshade-exaggeration":dk?0.5:0.45}},
+        {id:"contour",type:"line",source:"selo",filter:["all",K("contour"),["==",["get","i"],0]],
+          paint:{"line-color":P.contour,"line-opacity":0.32,"line-width":["interpolate",["linear"],["zoom"],14,0.5,18,1]}},
+        {id:"contour-i",type:"line",source:"selo",filter:["all",K("contour"),["==",["get","i"],1]],
+          paint:{"line-color":P.contour,"line-opacity":0.55,"line-width":["interpolate",["linear"],["zoom"],14,0.9,18,1.8]}},
+        {id:"bld",type:"fill",source:"selo",filter:K("bld"),paint:{"fill-color":v("--map-bld"),"fill-outline-color":v("--map-bld-line")}},
+        {id:"stream",type:"line",source:"selo",filter:K("stream"),paint:{"line-color":P.water,"line-width":2}},
+        // нашите записани следи — там, където OSM няма пътека, ние сме минали
+        {id:"walked",type:"line",source:"selo",filter:K("walked"),layout:{"line-cap":"round","line-join":"round"},
+          paint:{"line-color":P.walked,"line-opacity":0.8,"line-width":["interpolate",["linear"],["zoom"],14,1,18,2.2],"line-dasharray":[2,2]}},
+        {id:"track",type:"line",source:"selo",filter:["any",K("track"),K("path")],layout:{"line-cap":"round"},
+          paint:{"line-color":v("--map-road-line"),"line-width":["interpolate",["linear"],["zoom"],14,1,18,3],"line-dasharray":[2.5,2]}},
+        {id:"road-case",type:"line",source:"selo",filter:K("road"),layout:{"line-cap":"round","line-join":"round"},
+          paint:{"line-color":v("--map-road-line"),"line-width":["interpolate",["exponential",1.6],["zoom"],14,2.5,16,5.5,18,14,19,24]}},
+        {id:"road",type:"line",source:"selo",filter:K("road"),layout:{"line-cap":"round","line-join":"round"},
+          paint:{"line-color":v("--map-road"),"line-width":["interpolate",["exponential",1.6],["zoom"],14,1.3,16,3.8,18,10.5,19,19]}},
+        {id:"poi",type:"circle",source:"selo",filter:K("poi"),
+          paint:{"circle-radius":3.5,"circle-color":["match",["get","t"],"cheshma",v("--live"),"vodopad",v("--live"),v("--ink-faint")],
+                 "circle-stroke-color":v("--map-ground"),"circle-stroke-width":1.5,"circle-opacity":0.85}},
+        // маршрутът: оранжев като логото, изминатото — в цвета на „тази спирка“
+        {id:"rt-halo",type:"line",source:"route",filter:["==",["get","k"],"all"],layout:{"line-cap":"round","line-join":"round"},
+          paint:{"line-color":v("--map-ground"),"line-opacity":0.9,"line-width":["interpolate",["linear"],["zoom"],14,5,18,12]}},
+        {id:"rt",type:"line",source:"route",filter:["==",["get","k"],"all"],layout:{"line-cap":"round","line-join":"round"},
+          paint:{"line-color":v("--brand"),"line-width":["interpolate",["linear"],["zoom"],14,2.5,18,6]}},
+        {id:"rt-done",type:"line",source:"route",filter:["==",["get","k"],"done"],layout:{"line-cap":"round","line-join":"round"},
+          paint:{"line-color":v("--door"),"line-width":["interpolate",["linear"],["zoom"],14,2.8,18,6.5]}},
+        {id:"acc",type:"fill",source:"me",filter:["==",["get","k"],"acc"],paint:{"fill-color":v("--live"),"fill-opacity":0.16}},
+        {id:"lead",type:"line",source:"me",filter:["==",["get","k"],"lead"],layout:{"line-cap":"round"},
+          paint:{"line-color":v("--live"),"line-width":2.5,"line-dasharray":[2.5,2]}},
+        {id:"stop",type:"circle",source:"stops",
+          paint:{"circle-radius":["match",["get","s"],2,9,5.5],
+                 "circle-color":["match",["get","s"],2,v("--door"),1,v("--ink-faint"),v("--surface")],
+                 "circle-stroke-color":["match",["get","s"],2,"#ffffff",1,v("--surface"),v("--ink-faint")],
+                 "circle-stroke-width":["match",["get","s"],2,2.5,2]}}
+      ]
+    };
+  }
+
+  function mlTrackBounds(){
+    var b=[[180,90],[-180,-90]];
+    TRACK.forEach(function(t){ b[0][0]=Math.min(b[0][0],t[1]); b[0][1]=Math.min(b[0][1],t[0]); b[1][0]=Math.max(b[1][0],t[1]); b[1][1]=Math.max(b[1][1],t[0]) });
+    return b;
+  }
+
+  function mlMake(host,interactive){
+    var el=document.createElement("div"); el.className="mlmap";
+    host.appendChild(el);
+    var map=new maplibregl.Map({
+      container:el, style:mlStyle(), bounds:mlTrackBounds(), fitBoundsOptions:{padding:18},
+      minZoom:14, maxZoom:19.5, maxBounds:[[24.7862,43.0065],[24.8281,43.0307]],
+      interactive:interactive, attributionControl:false, dragRotate:false, pitchWithRotate:false,
+      fadeDuration:0, renderWorldCopies:false
+    });
+    if(interactive&&map.touchZoomRotate) map.touchZoomRotate.disableRotation();
+    var at=document.createElement("div"); at.className="ml-attr";
+    at.textContent="© OpenStreetMap contributors"+(interactive?" · релеф: Terrain Tiles":"");
+    el.appendChild(at);
+    var o={map:map, el:el, ready:false, num:null, me:null};
+    map.on("load",function(){ o.ready=true; mlState(o); mlMe(o); });
+    map.on("error",function(e){ try{console.warn("карта:",e.error&&e.error.message)}catch(x){} });   // липсваща плочка от релефа не е беда
+    return o;
+  }
+
+  // спирките и изминатата част — смени се при всяка нова спирка
+  function mlState(o){
+    if(!o||!o.ready) return;
+    var doneM=(view>=0&&view<GEO.length)?GEO[view].m:0, all=[], done=[];
+    for(var i=0;i<TRACK.length;i++){ all.push([TRACK[i][1],TRACK[i][0]]); if(CUM[i]<=doneM) done.push([TRACK[i][1],TRACK[i][0]]) }
+    var rf=[{type:"Feature",properties:{k:"all"},geometry:{type:"LineString",coordinates:all}}];
+    if(done.length>1) rf.push({type:"Feature",properties:{k:"done"},geometry:{type:"LineString",coordinates:done}});
+    o.map.getSource("route").setData({type:"FeatureCollection",features:rf});
+    var sf=GEO.map(function(g,i){ return {type:"Feature",properties:{s:i===view?2:(i<view?1:0)},geometry:{type:"Point",coordinates:[g.lon,g.lat]}} });
+    sf.sort(function(a,b){ return a.properties.s===2?1:b.properties.s===2?-1:0 });   // текущата отгоре
+    o.map.getSource("stops").setData({type:"FeatureCollection",features:sf});
+    if(o.num){ o.num.remove(); o.num=null }
+    if(view>=0&&view<GEO.length){
+      var n=document.createElement("div"); n.className="ml-num"; n.textContent=String(view+1);
+      o.num=new maplibregl.Marker({element:n,anchor:"bottom",offset:[0,-11]}).setLngLat([GEO[view].lon,GEO[view].lat]).addTo(o.map);
+    }
+  }
+
+  // синята точка, кръгът на точността, пунктирът до следващата спирка
+  function mlMe(o){
+    if(!o||!o.ready) return;
+    var f=[];
+    if(me){
+      var ring=[], r=Math.max(3,Math.min(250,me.acc)), k=Math.cos(me.lat*Math.PI/180);
+      for(var a=0;a<=36;a++){ var t=a/36*2*Math.PI; ring.push([me.lon+r*Math.sin(t)/(111320*k), me.lat+r*Math.cos(t)/110540]) }
+      f.push({type:"Feature",properties:{k:"acc"},geometry:{type:"Polygon",coordinates:[ring]}});
+      var nx=(view<0)?null:(!arrived?GEO[view]:(view<GEO.length-1?GEO[view+1]:null));
+      if(nx) f.push({type:"Feature",properties:{k:"lead"},geometry:{type:"LineString",coordinates:[[me.lon,me.lat],[nx.lon,nx.lat]]}});
+      if(!o.me){
+        var el=document.createElement("div"); el.className="ml-me";
+        el.innerHTML='<svg class="cone" viewBox="-40 -40 80 80"><path d="M0,0 L-15,-36 A39,39 0 0 1 15,-36 Z" fill="var(--live)" opacity=".32"/></svg><div class="dot"></div>';
+        o.me=new maplibregl.Marker({element:el,rotationAlignment:"map"}).setLngLat([me.lon,me.lat]).addTo(o.map);
+      } else o.me.setLngLat([me.lon,me.lat]);
+      mlCone(o);
+    } else if(o.me){ o.me.remove(); o.me=null }
+    o.map.getSource("me").setData({type:"FeatureCollection",features:f});
+  }
+  function mlCone(o){
+    if(!o||!o.me) return;
+    var c=o.me.getElement().querySelector(".cone");
+    if(heading===null){ c.style.display="none"; return }
+    c.style.display="block"; o.me.setRotation(heading);
+  }
+
+  // Камерата на голямата карта: около теб (и те следва), цялата разходка, или свободно.
+  function mlCamera(o,animate,fresh){
+    if(!o||!o.ready) return;
+    if(ML.mode==="all"){ o.map.fitBounds(mlTrackBounds(),{padding:24,animate:!!animate}); return }
+    if(ML.mode!=="me") return;
+    var c=me?[me.lon,me.lat]:(view>=0?[GEO[view].lon,GEO[view].lat]:[GEO[0].lon,GEO[0].lat]);
+    // ~340 м напряко при отваряне; после пази увеличението, което човекът си е избрал с пръсти
+    var z=fresh?15.9:o.map.getZoom();
+    if(animate) o.map.easeTo({center:c,zoom:z,duration:600}); else o.map.jumpTo({center:c,zoom:z});
+  }
+
+  function mlStrip(host){
+    if(!ML.strip){ ML.strip=mlMake(host,false) }
+    else if(ML.strip.el.parentNode!==host){ host.appendChild(ML.strip.el) }
+    var o=ML.strip;
+    requestAnimationFrame(function(){ o.map.resize(); o.map.fitBounds(mlTrackBounds(),{padding:{top:22,bottom:50,left:14,right:14},animate:false}); });
+    mlState(o);
+  }
+
+  function mlSheet(host){
+    if(ML.sheet&&ML.sheet.el.parentNode===host){ mlState(ML.sheet); mlMe(ML.sheet); return }
+    if(ML.sheet){ try{ML.sheet.map.remove()}catch(e){} }
+    var o=ML.sheet=mlMake(host,true);
+    o.map.on("load",function(){ mlCamera(o,false,true) });
+    // Човекът мести картата с пръст → спираме да я водим след него, докато не бутне „Около мен“.
+    o.map.on("dragstart",function(){ ML.mode="free"; mlZoomBtn() });
+    o.map.on("zoomstart",function(e){ if(e.originalEvent&&ML.mode==="all"){ ML.mode="free"; mlZoomBtn() } });
+  }
+  function mlSheetClose(){ if(ML.sheet){ try{ML.sheet.map.remove()}catch(e){} ML.sheet=null } }
+  function mlZoomBtn(){
+    var z=document.getElementById("zoombtn");
+    if(z) z.textContent=ML.mode==="me"?"Цялата разходка":"Около мен";
+  }
+
+  // Темата се сменя (светла/тъмна) → пребоядисваме.
+  try{ matchMedia("(prefers-color-scheme: dark)").addEventListener("change",function(){
+    [ML.strip,ML.sheet].forEach(function(o){ if(o&&o.ready){ o.ready=false; o.map.setStyle(mlStyle(),{diff:false}); o.map.once("style.load",function(){ o.ready=true; mlState(o); mlMe(o) }) } });
+  }) }catch(e){}
 
   function paintLive(){
     if(view<0||view>=TEXT.length){ liveBar.hidden=true; return }
@@ -840,7 +1073,10 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     st.hidden=false;
     st.className="mapstrip"+(stripOn?"":" mini");
     document.getElementById("mapBtn").textContent=stripOn?"Скрий":"Карта";
-    document.getElementById("stripmap").innerHTML=stripOn?mapSVG("s",false):"";
+    var sm=document.getElementById("stripmap");
+    if(!stripOn) sm.innerHTML="";
+    else if(ML.ok){ if(sm.querySelector("svg")) sm.innerHTML=""; mlStrip(sm) }
+    else sm.innerHTML=mapSVG("s",false);
     paintMe();
   }
 
@@ -855,6 +1091,10 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   function redrawSheet(){
     var w=document.getElementById("sheetmap");
     if(!w) return;
+    if(ML.ok){
+      if(w.querySelector("svg")) w.innerHTML="";
+      mlSheet(w); mlZoomBtn(); paintMe(); return;
+    }
     w.innerHTML=mapSVG("b",mapZoom);
     var z=document.getElementById("zoombtn");
     if(z) z.textContent=mapZoom?"Цялата разходка":"Около мен";
@@ -867,7 +1107,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     sh.innerHTML='<header><h2>Къде съм</h2>'+
         '<span class="tools"><button class="iconbtn" type="button" id="zoombtn">Цялата разходка</button>'+
         '<button class="iconbtn" type="button" data-close>Затвори</button></span></header>'+
-      '<div class="body"><div class="mapwrap" id="sheetmap">'+mapSVG("b",mapZoom)+'</div>'+
+      '<div class="body"><div class="mapwrap" id="sheetmap">'+(ML.ok?"":mapSVG("b",mapZoom))+'</div>'+
       '<div class="legend">'+
         '<i><b style="background:var(--live)"></b>вие</i>'+
         '<i><b style="background:var(--door)"></b>тази спирка</i>'+
@@ -882,11 +1122,15 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
         (trackOn?'':'<button class="btn primary wide" id="findme" type="button">Включи следенето</button>')+
       '</div></div>';
     sh.addEventListener("click",function(e){
-      if(e.target.closest("[data-close]")){ sh.remove(); wakeOff(); return }
-      if(e.target.closest("#zoombtn")){ mapZoom=!mapZoom; redrawSheet(); return }
-      if(e.target.closest("#findme")){ startTracking(true); sh.remove(); openMap(); }
+      if(e.target.closest("[data-close]")){ mlSheetClose(); sh.remove(); wakeOff(); return }
+      if(e.target.closest("#zoombtn")){
+        if(ML.ok){ ML.mode=(ML.mode==="me")?"all":"me"; mlZoomBtn(); mlCamera(ML.sheet,true,true); return }
+        mapZoom=!mapZoom; redrawSheet(); return
+      }
+      if(e.target.closest("#findme")){ startTracking(true); mlSheetClose(); sh.remove(); openMap(); }
     });
     document.querySelector(".phone").appendChild(sh);
+    ML.mode="me";                         // голямата карта винаги се отваря около теб
     redrawSheet();
     wakeOn();
   }
@@ -931,7 +1175,11 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     if(watchId!==null) navigator.geolocation.clearWatch(watchId);
     watchId=navigator.geolocation.watchPosition(function(pos){
       me={lat:pos.coords.latitude,lon:pos.coords.longitude,acc:Math.max(1,Math.round(pos.coords.accuracy))};
+      var hd=pos.coords.heading, sp=pos.coords.speed;
+      if(typeof hd==="number"&&!isNaN(hd)&&sp>0.6&&Date.now()-compassAt>3000) heading=hd;
       paintMe(); maybeAdvance(); checkRoute();
+      var nf=document.getElementById("ncfar");
+      if(nf&&view<GEO.length-1) nf.textContent=fmtDist(distTo(GEO[view+1]))+(GEO[view].walk?" · около "+GEO[view].walk+" мин":"");
       // приближената карта върви след теб
       if(mapZoom && document.getElementById("sheetmap")) redrawSheet();
     },function(err){
@@ -1018,6 +1266,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     x0=null;
   },{passive:true});
 
+  mlLoad();
   render();
   if(trackOn) startTracking(true);
 })();
@@ -1027,7 +1276,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   <button type="button" id="updbtn" style="pointer-events:auto;border:none;border-radius:999px;padding:11px 18px;background:var(--door);color:var(--on-door);font:600 14.5px var(--sans);box-shadow:0 8px 24px -8px rgba(0,0,0,.4)">Има нова версия · Презареди</button>
 </div>
 <script>
-var APPVER="razhodka1-v10", SHOW_UPDATE=false, OFFLINE_FILES=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./img/carkva.jpg","./img/cheshma.jpg","./img/hram.jpg","./img/johan.jpg","./img/levski.jpg","./img/patq.jpg","./img/plocha.jpg","./img/rajna.jpg","./img/shiroko.jpg","./img/sini.jpg","./img/sredishte.jpg","./img/ulichka.jpg","./img/vazov.jpg","./audio/kos.m4a","./audio/ku-ku.m4a","./audio/razdumka.m4a"];
+var APPVER="razhodka1-v12", SHOW_UPDATE=false, OFFLINE_FILES=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./img/carkva.jpg","./img/cheshma.jpg","./img/hram.jpg","./img/johan.jpg","./img/levski.jpg","./img/patq.jpg","./img/plocha.jpg","./img/rajna.jpg","./img/shiroko.jpg","./img/sini.jpg","./img/sredishte.jpg","./img/ulichka.jpg","./img/vazov.jpg","./audio/kos.m4a","./audio/ku-ku.m4a","./audio/razdumka.m4a","./map/dem/14/9320/6018.png","./map/dem/14/9320/6019.png","./map/dem/14/9321/6018.png","./map/dem/14/9321/6019.png","./map/maplibre-gl.css","./map/maplibre-gl.js","./map/selo.json"];
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('sw.js').catch(function(){});
