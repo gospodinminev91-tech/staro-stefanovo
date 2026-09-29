@@ -1,5 +1,5 @@
-var CACHE = "razhodka1-v8";
-var FILES = ["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./audio/razdumka.m4a"];
+var CACHE = "razhodka1-v9";
+var FILES = ["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./img/carkva.jpg","./img/cheshma.jpg","./img/hram.jpg","./img/johan.jpg","./img/levski.jpg","./img/patq.jpg","./img/plocha.jpg","./img/rajna.jpg","./img/shiroko.jpg","./img/sini.jpg","./img/sredishte.jpg","./img/ulichka.jpg","./img/vazov.jpg","./audio/razdumka.m4a"];
 
 self.addEventListener("install", function(e){
   self.skipWaiting();
