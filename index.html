@@ -186,6 +186,30 @@
   .wc .ws{font-size:14px;color:var(--ink-soft);line-height:1.4}
   .wc .wf{font-size:13.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
   .wc .resume{margin-top:3px;font-weight:600;font-size:14.5px;color:var(--act)}
+  /* ---- местата: списъкът на началния екран и страницата на всяко място ---- */
+  .placerow{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:9px 0;background:none;border:none;border-bottom:1px solid var(--line);color:inherit}
+  .placerow:last-of-type{border-bottom:none}
+  .placerow:active{background:var(--surface-2)}
+  .placerow .pth{width:58px;height:58px;border-radius:7px;flex:none;background:var(--surface-2) center/cover no-repeat;display:grid;place-items:center;color:var(--ink-faint)}
+  .placerow .pt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .placerow b{font-family:var(--serif);font-weight:400;font-size:17.5px;line-height:1.25}
+  .placerow small{font-size:13.5px;color:var(--ink-faint);line-height:1.35}
+  .placerow .chev{color:var(--ink-faint);flex:none;font-size:18px}
+  .placelist{display:flex;flex-direction:column}
+  .place .body{display:flex;flex-direction:column}
+  .place .ph img.main{width:100%;display:block;aspect-ratio:4/3;object-fit:cover;background:var(--surface-2);cursor:zoom-in}
+  .place .ph .thumbs{padding:8px 16px 0}
+  .place .pbody{padding:16px 16px 26px;display:flex;flex-direction:column;gap:14px}
+  .place h1{font-family:var(--serif);font-weight:400;font-size:28px;line-height:1.15;margin:0;letter-spacing:-.01em}
+  .place .ptxt p{margin:0 0 10px}
+  .place .visit{display:flex;gap:10px;align-items:baseline;background:var(--surface-2);border-radius:7px;padding:11px 13px;font-size:15.5px}
+  .place .visit .label{flex:none}
+  .place .pmap{border-radius:9px;overflow:hidden;border:1px solid var(--line)}
+  .place .pmap .mlmap{aspect-ratio:16/10;max-height:none}
+  .place .pmap:empty{display:none}
+  .place .pmeta{margin:0;font-size:14px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+  .place .draft{margin:0;font-size:14.5px;color:var(--ink-faint);font-style:italic}
+  .ml-pin{width:20px;height:20px;border-radius:50%;background:var(--act);border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.4)}
   .home .credit{margin:4px 0 0;font-size:13px;color:var(--ink-faint);line-height:1.45}
   .home .gpsnote{margin:0}
   .ml-wnum{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:700 12px var(--sans);color:#fff;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.35)}
@@ -322,7 +346,7 @@ var WALKS=[{id:"r1",name:"Разходка №1",len:2026,climb:80,walkmin:46,du
    се смята, че човекът е стигнал (етап 3: страницата се отваря сама).
    Радиусите са първоначални — нагласят се след ходене на терен. */
 var PLACES=[
-  {id:"carkva",   title:"Църквата „Рождество на Пресвета Богородица“", lat:43.022126,lon:24.809574,r:35,pics:["hram","carkva"]},
+  {id:"carkva",   title:"Църквата „Рождество на Пресвета Богородица“", lat:43.022126,lon:24.809574,r:35,pics:["carkva","hram"]},
   {id:"sini",     title:"Къщата със сините прозорци",               lat:43.022211,lon:24.808379,r:20,pics:["sini"]},
   {id:"cheshma",  title:"Старата нова чешма",                       lat:43.02269, lon:24.806456,r:20,pics:["cheshma"]},
   {id:"sredishte",title:"Средище на българска памет и къща Зарана", lat:43.022331,lon:24.805953,r:25,pics:["sredishte"]},
@@ -378,6 +402,19 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     contact:"[тук влиза твоят телефон / Facebook]"
   };
   /*COPY-END*/
+
+  // Текстовете на забележителностите — от ТЕКСТОВЕ-ЗАБЕЛЕЖИТЕЛНОСТИ.md, пише ги ОБНОВИ.ps1.
+  /*PLACES-START*/
+  var PTEXT={
+    carkva:{title:"Църквата „Рождество на Пресвета Богородица“",short:"В началото и в края на разходка №1.",visit:"",text:["От която и вяра да сте, Църквата ще ви приеме и ще чуе и радостта, и благодарността, и болката, и надеждата ви.","Сдружението съветва да я оставите за отдих и благодарност накрая на разходката."]},
+    sini:{title:"Къщата със сините прозорци",short:"Сини врати, прозорци и орнаменти, и голям орех на ъгъла.",visit:"",text:["Къща със сини врати, прозорци и орнаменти, и голям орех на ъгъла. Покрай нея пътят завива надясно и продължава като макадам."]},
+    cheshma:{title:"Старата нова чешма",short:"Най-хубавата вода в Стефаново.",visit:"",text:["Долу в ниското, там където пътят завива наляво. От нея си наливат вода всички в селото.","В блога на сдружението е разказана историята на възобновяването на чешмата."]},
+    sredishte:{title:"Средище на българска памет и къща Зарана",short:"Двете къщи, отворени за посещение.",visit:"Събота и неделя.",text:["Две къщи на широкото място. И двете са частна собственост, но са единствените в селото, отворени за посещение от собствениците."]},
+    levski:{title:"Къщичката, в която се е крил Васил Левски",short:"На ъгъла на една приказна къща, най-високо в разходката.",visit:"",text:["Две-три къщи преди края на селото, долу в ниското под „Иван Вазов“, има приказна къща. На ъгъла ѝ още стои къщичката, в която се е крил Васил Левски."]},
+    plocha:{title:"Паметната плоча",short:"Тук е основан тайният революционен комитет.",visit:"",text:["На това място е имало къща, в която Васил Левски и врачени (стефановци) основават таен революционен комитет. Плочата носи и годината — 1870."]},
+    uzunka:{title:"Чешма Узунка",short:"",visit:"",text:[]}
+  };
+  /*PLACES-END*/
 
   // текущата разходка — засега винаги първата; изборът идва с началния екран (етап 3)
   var WALK=WALKS[0]; WALK.text=TEXT; WALK.copy=COPY;
@@ -487,10 +524,53 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
          '<b>'+esc(w.title)+'</b><span class="ws">'+esc(w.sub)+'</span><span class="wf">'+meta+'</span>'+resume+
          '</span></button>';
     });
+    h+='<div class="sect">Места в селото</div><div class="placelist">';
+    PLACES.forEach(function(p){
+      var t=PTEXT[p.id]||{}, pic=p.pics.length?PIC[p.pics[0]]:"";
+      h+='<button class="placerow" type="button" data-place="'+p.id+'">'+
+         '<span class="pth"'+(pic?' style="background-image:url(\''+pic+'\')"':'')+'>'+(pic?'':'·')+'</span>'+
+         '<span class="pt"><b>'+esc(t.title||p.title)+'</b>'+(t.short?'<small>'+esc(t.short)+'</small>':'')+'</span>'+
+         '<span class="chev">›</span></button>';
+    });
+    h+='</div>';
     h+='<p class="credit">Текстовете и снимките са по материали на сдружение „Старо Стефаново“.</p>'+
        '<p class="gpsnote" id="offline"></p>'+
       '</div></div>';
     return h;
+  }
+
+  // Страница на забележителност — отваря се над всичко (от началния екран, после и сама при пристигане).
+  function openPlace(id){
+    var p=PLACES.filter(function(x){return x.id===id})[0]; if(!p) return;
+    var t=PTEXT[id]||{}, title=t.title||p.title;
+    var stops=[]; GEO.forEach(function(g,i){ if(g.place===id) stops.push(i) });
+    var h='<header><h2>Място в селото</h2><button class="iconbtn" type="button" data-close>Затвори</button></header><div class="body">';
+    if(p.pics.length){
+      h+='<div class="ph"><img class="main" src="'+PIC[p.pics[0]]+'" alt="'+esc(title)+'">';
+      if(p.pics.length>1){ h+='<div class="thumbs">'; for(var k=1;k<p.pics.length;k++) h+='<img src="'+PIC[p.pics[k]]+'" alt="">'; h+='</div>' }
+      h+='</div>';
+    }
+    h+='<div class="pbody"><h1>'+esc(title)+'</h1>';
+    if(me) h+='<p class="pmeta">На '+fmtDist(haversine(me.lat,me.lon,p.lat,p.lon))+' от вас</p>';
+    if(t.text&&t.text.length) h+='<div class="ptxt">'+t.text.map(function(x){return '<p>'+esc(x)+'</p>'}).join('')+'</div>';
+    else h+='<p class="draft">Текстът за това място предстои.</p>';
+    if(t.visit) h+='<div class="visit"><span class="label">Посещение</span><span>'+esc(t.visit)+'</span></div>';
+    h+='<div class="pmap" id="placemap"></div>';
+    stops.forEach(function(i){
+      h+='<button class="btn wide" type="button" data-stop="'+i+'">Разходка №1 · спирка '+(i+1)+' →</button>';
+    });
+    h+='</div></div>';
+    var sh=document.createElement("div"); sh.className="sheet place"; sh.innerHTML=h;
+    var close=function(){ mlPlaceOff(); sh.remove() };
+    sh.addEventListener("click",function(e){
+      if(e.target.closest("[data-close]")){ close(); return }
+      var st=e.target.closest("[data-stop]");
+      if(st){ close(); home=false; go(parseInt(st.getAttribute("data-stop"),10)); return }
+      var im=e.target.closest("img");
+      if(im){ document.getElementById("lbimg").src=im.src; document.getElementById("lb").classList.add("on") }
+    });
+    document.querySelector(".phone").appendChild(sh);
+    mlPlace(document.getElementById("placemap"),p);
   }
 
   function coverHTML(){
@@ -760,7 +840,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
         } else ld.style.display="none";
       }
     });
-    mlMe(ML.strip); mlMe(ML.sheet);
+    mlMe(ML.strip); mlMe(ML.sheet); mlMe(ML.place);
     if(me&&ML.mode==="me") mlCamera(ML.sheet,true);
     paintLive();
     // Съзнателно НЕ показваме „най-близката спирка“ — маршрутът се връща покрай себе си
@@ -825,7 +905,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
      Ако MapLibre не тръгне (стар телефон без WebGL, файлът не е дошъл) — остава
      старата SVG карта отгоре, нищо не се чупи. Правят се с ЗАПИСИ\pravi-kartata.js. */
   var BASE=location.href.replace(/[#?].*$/,"").replace(/[^\/]*$/,"");
-  var ML={ok:false, data:null, strip:null, sheet:null, mode:"me"};   // mode: me = води след теб, all = цялата, free = човекът я мести
+  var ML={ok:false, data:null, strip:null, sheet:null, home:null, place:null, mode:"me"};   // mode: me = води след теб, all = цялата, free = човекът я мести
 
   function mlLoad(){
     try{
@@ -1039,6 +1119,18 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
       if(fs.length) o.map.fitBounds(b,{padding:28,animate:false});
     });
   }
+  // Карта на мястото: приближена около него, с маршрута на №1 за ориентир и карфица.
+  function mlPlace(host,p){
+    if(!host||!ML.ok) return;
+    mlPlaceOff();
+    var o=ML.place=mlMake(host,false);
+    o.map.on("load",function(){
+      o.map.resize(); o.map.jumpTo({center:[p.lon,p.lat],zoom:16.4});
+      var el=document.createElement("div"); el.className="ml-pin";
+      new maplibregl.Marker({element:el}).setLngLat([p.lon,p.lat]).addTo(o.map);
+    });
+  }
+  function mlPlaceOff(){ if(ML.place){ try{ML.place.map.remove()}catch(e){} ML.place=null } }
   function mlHomeOff(){ if(ML.home){ try{ML.home.map.remove()}catch(e){} ML.home=null } }
   function mlSheetClose(){ if(ML.sheet){ try{ML.sheet.map.remove()}catch(e){} ML.sheet=null } }
   function mlZoomBtn(){
@@ -1352,6 +1444,8 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   document.getElementById("listBtn").addEventListener("click",function(e){ e.stopPropagation(); });
 
   scroll.addEventListener("click",function(e){
+    var pl=e.target.closest("[data-place]");
+    if(pl){ openPlace(pl.getAttribute("data-place")); return; }
     var wk=e.target.closest("[data-walk]");
     if(wk&&!wk.disabled){ home=false; dir=1; render(); return; }   // засега има една готова; изборът на разходка е в етап 4
     if(e.target.closest("#playbtn")){
@@ -1391,7 +1485,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   <button type="button" id="updbtn" style="pointer-events:auto;border:none;border-radius:999px;padding:11px 18px;background:var(--door);color:var(--on-door);font:600 14.5px var(--sans);box-shadow:0 8px 24px -8px rgba(0,0,0,.4)">Има нова версия · Презареди</button>
 </div>
 <script>
-var APPVER="razhodka1-v14", SHOW_UPDATE=false, OFFLINE_FILES=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./img/carkva.jpg","./img/cheshma.jpg","./img/hram.jpg","./img/johan.jpg","./img/levski.jpg","./img/patq.jpg","./img/plocha.jpg","./img/rajna.jpg","./img/shiroko.jpg","./img/sini.jpg","./img/sredishte.jpg","./img/ulichka.jpg","./img/vazov.jpg","./audio/kos.m4a","./audio/ku-ku.m4a","./audio/razdumka.m4a","./map/dem/14/9320/6018.png","./map/dem/14/9320/6019.png","./map/dem/14/9321/6018.png","./map/dem/14/9321/6019.png","./map/maplibre-gl.css","./map/maplibre-gl.js","./map/selo.json"];
+var APPVER="razhodka1-v15", SHOW_UPDATE=false, OFFLINE_FILES=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./img/carkva.jpg","./img/cheshma.jpg","./img/hram.jpg","./img/johan.jpg","./img/levski.jpg","./img/patq.jpg","./img/plocha.jpg","./img/rajna.jpg","./img/shiroko.jpg","./img/sini.jpg","./img/sredishte.jpg","./img/ulichka.jpg","./img/vazov.jpg","./audio/kos.m4a","./audio/ku-ku.m4a","./audio/razdumka.m4a","./map/dem/14/9320/6018.png","./map/dem/14/9320/6019.png","./map/dem/14/9321/6018.png","./map/dem/14/9321/6019.png","./map/maplibre-gl.css","./map/maplibre-gl.js","./map/selo.json"];
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('sw.js').catch(function(){});
