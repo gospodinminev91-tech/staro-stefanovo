@@ -139,6 +139,14 @@
   .block p{margin:0}
   .go{border-left:4px solid var(--act);padding:3px 0 3px 14px}
   .go p{font-weight:600;font-size:19px;line-height:1.42;color:var(--ink)}
+  /* Табела „завой" (Б): стрелка + посока, горе на спирката. Цветът е цветът на действието. */
+  .turnsign{display:flex;align-items:center;gap:13px;background:var(--act);color:var(--on-act);border-radius:11px;padding:12px 16px 12px 13px}
+  .turnsign svg{flex:none;width:40px;height:40px}
+  .turnsign small{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;opacity:.85}
+  .turnsign b{display:block;font-size:21px;font-weight:700;line-height:1.2}
+  /* Стрелка на картата (В): сочи накъдето върви пътят от завоя */
+  .ml-turn{width:26px;height:26px;border-radius:50%;background:var(--act);border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.35);display:grid;place-items:center;pointer-events:none}
+  .ml-turn svg{width:16px;height:16px;display:block}
   /* „Следва" — в дъното на всяка спирка: коя е следващата и как се познава. Не се натиска нищо, за да се види. */
   .nextcard{margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:13px 14px 15px;display:flex;flex-direction:column;gap:12px;background:var(--surface)}
   .nextcard > .label{color:var(--act)}
@@ -368,13 +376,13 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   var TEXT=[
     {t:"stop",title:"Началото — по „Иван Вазов“ нагоре",look:"Църквата. Тя остава вляво.",go:"Тръгнете по баира нагоре, по асфалтираната ул. „Иван Вазов“.",note:"Църквата си я оставете за отдих и благодарност накрая!"},
     {t:"stop",title:"Нагоре покрай къщите",look:"Запазени, красиви къщи от двете страни.",go:"Пътят се изкачва нагоре покрай тях.",note:""},
-    {t:"turn",title:"Къщата със сините прозорци",look:"Малко след тях, вдясно — къща със сини врати, прозорци и орнаменти, и голям орех на ъгъла.",go:"Завивате вдясно покрай нея и тръгвате по макадамовия път.",note:""},
+    {t:"turn",title:"Къщата със сините прозорци",look:"Малко след тях, вдясно — къща със сини врати, прозорци и орнаменти, и голям орех на ъгъла.",go:"Завивате вдясно покрай нея и тръгвате по макадамовия път.",note:"",dir:"надясно"},
     {t:"stop",title:"Старата нова чешма",look:"Качвате се нагоре и точно когато ожаднеете — там, където пътят завива наляво, долу в ниското се вижда чешмата.",go:"Слезте и пийте от най-хубавата вода в Стефаново, от която си наливаме всички. После се върнете горе на пътя.",note:"В блога на сдружението можете да прочетете интересната история на възобновяването на чешмата."},
-    {t:"visit",title:"Средище на българска памет и къща Зарана",look:"На широкото, вляво — СРЕДИЩЕ НА БЪЛГАРСКА ПАМЕТ и Къща ЗАРАНА.",go:"Завийте надясно по поляната към трафопоста.",note:"И двете къщи са частна собственост, но са единствените в селото, отворени за посещение от собствениците в събота и неделя.",warn:"Отворени са само в събота и неделя."},
-    {t:"turn",title:"Нагоре по склона към „Райна Княгиня“",look:"Склонът точно срещу ЗАРАНА. Нагоре подминавате чешмата и трафопоста — остават ви вдясно.",go:"Не продължавайте по макадамовия път! Качете се направо нагоре по склона до асфалтовата уличка „Райна Княгиня“ и по нея завийте вдясно.",note:"Прекрасна разходка между стари къщи, а накрая и невероятната гледка, която ще ви се разкрие.",warn:"Тук се сбърква най-често. Не оставайте на макадама."},
-    {t:"turn",title:"Обратно на „Иван Вазов“",look:"Краят на „Райна Княгиня“ — излизате отново на централната улица.",go:"Върнете се обратно по „Райна Княгиня“, този път до края. После завийте вдясно и нагоре.",note:""},
+    {t:"visit",title:"Средище на българска памет и къща Зарана",look:"На широкото, вляво — СРЕДИЩЕ НА БЪЛГАРСКА ПАМЕТ и Къща ЗАРАНА.",go:"Завийте надясно по поляната към трафопоста.",note:"И двете къщи са частна собственост, но са единствените в селото, отворени за посещение от собствениците в събота и неделя.",warn:"Отворени са само в събота и неделя.",dir:"надясно и нагоре към трафопоста"},
+    {t:"turn",title:"Нагоре по склона към „Райна Княгиня“",look:"Склонът точно срещу ЗАРАНА. Нагоре подминавате чешмата и трафопоста — остават ви вдясно.",go:"Не продължавайте по макадамовия път! Качете се направо нагоре по склона до асфалтовата уличка „Райна Княгиня“ и по нея завийте вдясно.",note:"Прекрасна разходка между стари къщи, а накрая и невероятната гледка, която ще ви се разкрие.",warn:"Тук се сбърква най-често. Не оставайте на макадама.",dir:"надясно към гледката"},
+    {t:"turn",title:"Обратно на „Иван Вазов“",look:"Краят на „Райна Княгиня“ — излизате отново на централната улица.",go:"Върнете се обратно по „Райна Княгиня“, този път до края. После завийте вдясно и нагоре.",note:"",dir:"надясно и нагоре"},
     {t:"stop",title:"Къщичката, в която се е крил Васил Левски",look:"Долу в ниското има приказна къща. А на ъгъла ѝ още стои къщичката.",go:"Няколко минути още нагоре по ул. „Иван Вазов“, две-три къщи преди края на селото, се спуснете рязко вляво направо по склона.",note:""},
-    {t:"turn",title:"От голямата порта надолу",look:"Голямата порта.",go:"От нея тръгнете наляво и се спуснете по уличката надолу. Ще излезете на широко място и отново на ул. „Иван Вазов“.",note:""},
+    {t:"turn",title:"От голямата порта надолу",look:"Голямата порта.",go:"От нея тръгнете наляво и се спуснете по уличката надолу. Ще излезете на широко място и отново на ул. „Иван Вазов“.",note:"",dir:"наляво"},
     {t:"stop",title:"Оттук имате две възможности",look:"Широкото място на „Иван Вазов“.",go:"Можете да продължите по „Иван Вазов“ надолу и пак да излезете при църквата. Или на широкото да завиете вдясно и да се гмурнете из невероятни улички, скрити от погледа на обикновения турист.",note:""},
     {t:"stop",title:"Паметната плоча",look:"Веднага вдясно — паметна плоча на каменен зид, до дървена порта.",go:"Продължете по уличката до чешма Узунка.",note:"На това място е имало къща, в която Васил Левски и врачени (стефановци) основават таен революционен комитет. Плочата носи и годината — 1870."},
     {t:"stop",title:"Чешма Узунка",look:"Чешма Узунка.",go:"Оттук се връщате надолу към църквата — около 700 метра.",note:""},
@@ -665,13 +673,27 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     // то казва как да я познаете.
     var look='<div class="block'+(going?" go":"")+'"><span class="label">Какво търсите</span><p>'+esc(s.look)+'</p></div>';
     var goB='<div class="block'+(going?"":" go")+'"><span class="label">Накъде</span><p>'+esc(s.go)+'</p></div>';
+    h+=turnSignHTML(i);
     h+= going ? look+goB : goB+look;
     if(s.note) h+='<div class="note"><span class="label">Между другото</span><p>'+esc(s.note)+'</p></div>';
     if(s.warn) h+='<div class="warn">'+ICON.warn+'<span>'+esc(s.warn)+'</span></div>';
     if(going&&pg&&pg.walk) h+='<p class="walknote">От предишната — около '+pg.walk+' мин вървене.</p>';
-    if(!going&&i<TEXT.length-1) h+=nextCardHTML(i);
+    if(i<TEXT.length-1) h+=nextCardHTML(i);          // „Следва“ — на всяка спирка, стигнали или на път
     h+='</div>';
     return h;
+  }
+
+  // Табела „завой": накъде се тръгва ОТ тази спирка (поле ПОСОКА в текстовете).
+  // Стрелката се решава от думата: „наляво" → ↰, „надясно" → ↱, иначе ↑.
+  var ARROW={
+    right:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 20v-7a4 4 0 0 1 4-4h9"/><path d="M15 5l4 4-4 4"/></svg>',
+    left:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 20v-7a4 4 0 0 0-4-4H5"/><path d="M9 5L5 9l4 4"/></svg>',
+    up:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V5"/><path d="M6 11l6-6 6 6"/></svg>'
+  };
+  function dirKind(d){ d=(d||"").toLowerCase(); return d.indexOf("наляво")>=0?"left":(d.indexOf("надясно")>=0?"right":"up") }
+  function turnSignHTML(i){
+    var d=TEXT[i].dir; if(!d) return "";
+    return '<div class="turnsign">'+ARROW[dirKind(d)]+'<span><small>Оттук</small><b>'+esc(d.charAt(0).toUpperCase()+d.slice(1))+'</b></span></div>';
   }
 
   // „Следва“: следващата спирка в малко прозорче — снимка, име, колко е, как се познава.
@@ -697,7 +719,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
       '</div>'+
       '<div class="colophon"><img src="'+LOGO+'" alt=""><span>'+esc(COPY.l1||"")+
         '<br>Картата е по данни на OpenStreetMap (ODbL) — © OpenStreetMap contributors.'+
-        '<br>Звуци от Wikimedia Commons: кукувица — Vladimir Yu. Arkhipov (CC BY-SA 3.0); кос — Taka (CC BY 2.5).</span></div>'+
+        '<br>Звуци: кукувица и петел — Pixabay.</span></div>'+
       '</div>';
   }
 
@@ -1025,8 +1047,39 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   }
 
   // спирките и изминатата част — смени се при всяка нова спирка
+  // Посоката на пътя от спирка i: най-близката точка на следата до спирката (търси се само
+  // около нейния километраж — пътят минава покрай себе си), после ~10 и ~35 м напред.
+  function trackAt(m){ for(var k=0;k<CUM.length;k++) if(CUM[k]>=m) return k; return CUM.length-1 }
+  function stopOnTrack(g){
+    var best=-1,bd=1e9;
+    for(var k=0;k<TRACK.length;k++){ if(Math.abs(CUM[k]-g.m)>150) continue;
+      var d=haversine(g.lat,g.lon,TRACK[k][0],TRACK[k][1]); if(d<bd){bd=d;best=k} }
+    return best<0?trackAt(g.m):best;
+  }
+  function bearing(a,b){
+    var y=Math.sin((b[1]-a[1])*Math.PI/180)*Math.cos(b[0]*Math.PI/180),
+        x=Math.cos(a[0]*Math.PI/180)*Math.sin(b[0]*Math.PI/180)-Math.sin(a[0]*Math.PI/180)*Math.cos(b[0]*Math.PI/180)*Math.cos((b[1]-a[1])*Math.PI/180);
+    return (Math.atan2(y,x)*180/Math.PI+360)%360;
+  }
+  function turnArrows(o){
+    (o.turns||[]).forEach(function(mk){ mk.remove() }); o.turns=[];
+    GEO.forEach(function(g,i){
+      if(!TEXT[i]||!TEXT[i].dir) return;
+      if(o===ML.strip&&i!==view) return;          // в малката лента — само стрелката на текущата спирка
+      var k0=CUM[stopOnTrack(g)], a=TRACK[trackAt(k0+10)], b=TRACK[trackAt(k0+35)];
+      if(!a||!b||a===b) return;
+      var inb=bearing(TRACK[trackAt(k0-35)],TRACK[trackAt(k0-5)]), out=bearing(a,b);
+      var turn=((out-inb+540)%360)-180, kind=dirKind(TEXT[i].dir), brg=out;
+      // Ако следата и текстът спорят (записът е минал по друг път — спирки 5 и 6 на 29.09),
+      // стрелката следва текста: ±90° от посоката, от която идвате. Нов запис оправя това сам.
+      if((kind==="right"&&turn<10)||(kind==="left"&&turn>-10)) brg=(inb+(kind==="right"?90:-90)+360)%360;
+      var el=document.createElement("div"); el.className="ml-turn"; el.innerHTML=ARROW.up.replace('stroke="currentColor"','stroke="#fff"');
+      o.turns.push(new maplibregl.Marker({element:el,rotationAlignment:"map"}).setLngLat([a[1],a[0]]).setRotation(brg).addTo(o.map));
+    });
+  }
   function mlState(o){
     if(!o||!o.ready||o.home) return;
+    if(!o.turns||o===ML.strip) turnArrows(o);
     var doneM=(view>=0&&view<GEO.length)?GEO[view].m:0, all=[], done=[];
     for(var i=0;i<TRACK.length;i++){ all.push([TRACK[i][1],TRACK[i][0]]); if(CUM[i]<=doneM) done.push([TRACK[i][1],TRACK[i][0]]) }
     var rf=[{type:"Feature",properties:{k:"all"},geometry:{type:"LineString",coordinates:all}}];
@@ -1193,10 +1246,14 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     }catch(e){}
   }
   function vib(p){ try{ if(navigator.vibrate) navigator.vibrate(p) }catch(e){} }
-  /* Истински записи от Wikimedia Commons (авторите са на финалния екран):
-     стигане — кукувица „ку-ку“; завой — кос. Предупреждението остава тон —
-     то не бива да звучи приятно. Ако записът не се е заредил — тон.         */
-  var BIRD={stop:"audio/ku-ku.m4a", turn:"audio/kos.m4a"}, BUF={};
+  /* Звуците при пристигане (от 30.09.2026):
+     спирка — часовник-кукувица, два сигнала (от Pixabay, файлът на потребителя е в ЗАПИСИАУДИОот-потребителя);
+     спирка 5 — петел (от Pixabay, също там);
+     завой — велосипеден звънец (синтезиран от нас, 30.09) — завоят звучи различно,
+     защото там се губят хората. Предупреждението остава тон — то не бива да звучи приятно.
+     Ако записът не се е заредил — тон.                                                     */
+  var BIRD={stop:"audio/kukuvica.wav", turn:"audio/zvanec.wav", petel:"audio/petel.wav"}, BUF={};
+  var STOP_SOUND={4:"petel"};              // спирка (от 0) → свой звук вместо кукувицата; 4 = спирка 5
   function loadBirds(){
     if(!AC) return;
     Object.keys(BIRD).forEach(function(k){
@@ -1217,7 +1274,11 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
     lost:  function(){ vib([250,120,250,120,250]); tones([[440,.22],[440,.22],[440,.22]]); }
   };
   // при пристигане: завоят звучи различно, защото там се губят хората
-  function buzz(){ var s=TEXT[view]; (s&&s.t==="turn"?SIG.turn:SIG.stop)(); }
+  function buzz(){
+    var s=TEXT[view];
+    if(STOP_SOUND[view]){ vib([35,55,35]); bird(STOP_SOUND[view],[[880,.14]]); return; }
+    (s&&(s.t==="turn"||s.dir)?SIG.turn:SIG.stop)();       // завой или спирка с посока → звънец
+  }
   function arriveMsg(n){ return (TEXT[n].t==="turn"?"Завой · ":"Спирка "+(n+1)+" · ")+TEXT[n].title; }
 
   /* ---------- отклонение от маршрута ----------
@@ -1485,7 +1546,7 @@ var MAPGEO={roads:["3245,-986 3245,-970 3283,-784 3295,-718 3295,-687 3271,-644 
   <button type="button" id="updbtn" style="pointer-events:auto;border:none;border-radius:999px;padding:11px 18px;background:var(--door);color:var(--on-door);font:600 14.5px var(--sans);box-shadow:0 8px 24px -8px rgba(0,0,0,.4)">Има нова версия · Презареди</button>
 </div>
 <script>
-var APPVER="razhodka1-v15", SHOW_UPDATE=false, OFFLINE_FILES=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./img/carkva.jpg","./img/cheshma.jpg","./img/hram.jpg","./img/johan.jpg","./img/levski.jpg","./img/patq.jpg","./img/plocha.jpg","./img/rajna.jpg","./img/shiroko.jpg","./img/sini.jpg","./img/sredishte.jpg","./img/ulichka.jpg","./img/vazov.jpg","./audio/kos.m4a","./audio/ku-ku.m4a","./audio/razdumka.m4a","./map/dem/14/9320/6018.png","./map/dem/14/9320/6019.png","./map/dem/14/9321/6018.png","./map/dem/14/9321/6019.png","./map/maplibre-gl.css","./map/maplibre-gl.js","./map/selo.json"];
+var APPVER="razhodka1-v17", SHOW_UPDATE=false, OFFLINE_FILES=["./","./index.html","./manifest.webmanifest","./icon-192.png","./icon-512.png","./apple-touch-icon.png","./img/carkva.jpg","./img/cheshma.jpg","./img/hram.jpg","./img/johan.jpg","./img/levski.jpg","./img/patq.jpg","./img/plocha.jpg","./img/rajna.jpg","./img/shiroko.jpg","./img/sini.jpg","./img/sredishte.jpg","./img/ulichka.jpg","./img/vazov.jpg","./audio/kukuvica.wav","./audio/petel.wav","./audio/razdumka.m4a","./audio/zvanec.wav","./map/dem/14/9320/6018.png","./map/dem/14/9320/6019.png","./map/dem/14/9321/6018.png","./map/dem/14/9321/6019.png","./map/maplibre-gl.css","./map/maplibre-gl.js","./map/selo.json"];
 if('serviceWorker' in navigator){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('sw.js').catch(function(){});
